@@ -1,0 +1,13 @@
+{
+  "columns": {
+    "id": {
+      "type": "INT"
+    },
+    "name": {
+      "type": "VARCHAR",
+      "length": 100
+    }
+  },
+  "primary": "id",
+  "data": null
+}

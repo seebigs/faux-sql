@@ -1,0 +1,30 @@
+{
+  "columns": {
+    "id": {
+      "type": "INT",
+      "primary": true,
+      "not_null": true,
+      "unique": true,
+      "auto_increment": true
+    },
+    "name": {
+      "type": "VARCHAR",
+      "unique": true,
+      "length": 100,
+      "default": {
+        "type": "value",
+        "value": "Nimo"
+      }
+    },
+    "last_login": {
+      "type": "DATE",
+      "default": {
+        "type": "function",
+        "name": "getdate",
+        "args": []
+      }
+    }
+  },
+  "primary": "id",
+  "data": null
+}

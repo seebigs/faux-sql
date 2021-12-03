@@ -1,0 +1,82 @@
+{
+  "columns": {
+    "id": {
+      "type": "INT",
+      "auto_increment": true
+    },
+    "name": {
+      "type": "VARCHAR",
+      "length": 100
+    },
+    "type": {
+      "type": "VARCHAR",
+      "length": 100,
+      "default": {
+        "type": "value",
+        "value": "member"
+      }
+    },
+    "hat": {
+      "type": "VARCHAR",
+      "length": 100
+    },
+    "height": {
+      "type": "VARCHAR",
+      "length": 100
+    },
+    "age": {
+      "type": "INT"
+    }
+  },
+  "primary": "id",
+  "data": {
+    "0": {
+      "id": 1,
+      "name": "Aaron A Aaronson",
+      "type": "admin",
+      "hat": "red",
+      "height": "tall",
+      "age": 55
+    },
+    "1": {
+      "id": 2,
+      "name": "John Doe",
+      "type": "admin",
+      "hat": "blue",
+      "height": "tall",
+      "age": 15
+    },
+    "2": {
+      "id": 3,
+      "name": "Sally Ride",
+      "type": "member",
+      "hat": "red",
+      "height": "short",
+      "age": 33
+    },
+    "3": {
+      "id": 4,
+      "name": "Willy Wonka",
+      "type": "member",
+      "hat": "blue",
+      "height": "tall",
+      "age": 22
+    },
+    "4": {
+      "id": 5,
+      "name": "Noah Dupe",
+      "type": "admin",
+      "hat": "blue",
+      "height": "short",
+      "age": 15
+    },
+    "5": {
+      "id": 5,
+      "name": "Noah Dupe",
+      "type": "admin",
+      "hat": "blue",
+      "height": "short",
+      "age": 15
+    }
+  }
+}

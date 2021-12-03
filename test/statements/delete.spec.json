@@ -1,0 +1,46 @@
+{
+  "columns": {
+    "id": {
+      "type": "INT",
+      "primary": true,
+      "not_null": true,
+      "unique": true,
+      "auto_increment": true
+    },
+    "name": {
+      "type": "VARCHAR",
+      "unique": true,
+      "length": 100,
+      "default": {
+        "type": "value",
+        "value": "Nimo"
+      }
+    },
+    "last_login": {
+      "type": "DATE",
+      "default": {
+        "type": "function",
+        "name": "getdate",
+        "args": []
+      }
+    }
+  },
+  "primary": "id",
+  "data": {
+    "0": {
+      "id": 1,
+      "name": "August",
+      "last_login": "today"
+    },
+    "1": {
+      "id": 2,
+      "name": "Bill",
+      "last_login": "yesterday"
+    },
+    "2": {
+      "id": 3,
+      "name": "Ted",
+      "last_login": "yesterday"
+    }
+  }
+}
