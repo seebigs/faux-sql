@@ -35,9 +35,6 @@ describe(testName, () => {
             columns: {
                 id: {
                     type: 'INT',
-                    primary: true,
-                    unique: true,
-                    not_null: true,
                     auto_increment: true,
                 },
                 name: {

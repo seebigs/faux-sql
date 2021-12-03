@@ -35,9 +35,6 @@ describe(testName, () => {
                 email: {
                     type: 'VARCHAR',
                     length: 255,
-                    primary: true,
-                    not_null: true,
-                    unique: true,
                 },
             },
             primary: 'email',

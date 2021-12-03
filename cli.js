@@ -15,7 +15,7 @@ if (statements.length) {
                 console.log(results);
             }
         } catch (err) {
-            console.log('\nError:', err.message);
+            console.log('\nError:', err);
         }
     });
 }

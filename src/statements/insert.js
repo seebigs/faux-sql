@@ -38,7 +38,8 @@ export default async function insert(parsed) {
                         }
                     }
                 }
-                if (tableColumn.not_null && (val === null || typeof val === 'undefined')) {
+                const mustNotBeNull = tableColumn.not_null || table.primary === columnName;
+                if (mustNotBeNull && (val === null || typeof val === 'undefined')) {
                     throw new Error(`${tableName} ${columnName} cannot be NULL`);
                 }
                 // TODO enforce type coersion using tableColumn
