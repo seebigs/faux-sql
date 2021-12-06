@@ -2,9 +2,6 @@
   "columns": {
     "id": {
       "type": "INT",
-      "primary": true,
-      "not_null": true,
-      "unique": true,
       "auto_increment": true
     },
     "name": {

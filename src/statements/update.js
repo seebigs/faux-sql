@@ -20,7 +20,7 @@ export default async function update(parsed) {
 
         each(data, (row, index) => {
             each(set, (mod) => {
-                const expr = evalExpression(mod.value, row, data);
+                const expr = evalExpression(mod.value, row, table.data);
                 if (expr) {
                     data[index][mod.column] = expr.value;
                 }

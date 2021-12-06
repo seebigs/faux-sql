@@ -61,4 +61,33 @@ describe(testName, () => {
         });
     });
 
+    it('does not allow duplicates for unique keys', async () => {
+        expect.assertions(1);
+        await expect(fauxSQL(
+            `
+            INSERT INTO ${testName} (id, name)
+            VALUES (2, 'Bill')
+            `,
+        )).rejects.toThrow();
+    });
+
+    it('handles on duplicate update', async () => {
+        expect.assertions(1);
+        await fauxSQL(
+            `
+            INSERT INTO ${testName} (id, name)
+            VALUES (2, 'Bill')
+            ON DUPLICATE KEY UPDATE
+            last_login = "today"
+            `,
+        );
+        const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        expect(table.data).toEqual({
+            0: { id: 1, name: 2, last_login: 3 },
+            1: { id: 2, name: 'Bill', last_login: 'today' },
+            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
+            3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },
+        });
+    });
+
 });
