@@ -88,8 +88,8 @@ describe(testName, () => {
     });
 
     it('handles where like', async () => {
-        expect.assertions(1);
-        const results = await fauxSQL(
+        expect.assertions(3);
+        let results = await fauxSQL(
             `
             SELECT id
             FROM ${testName}
@@ -99,6 +99,57 @@ describe(testName, () => {
         expect(results).toEqual([
             { id: 3 },
             { id: 4 },
+        ]);
+        results = await fauxSQL(
+            `
+            SELECT id
+            FROM ${testName}
+            WHERE name NOT like "%ll%"
+            `,
+        );
+        expect(results).toEqual([
+            { id: 1 },
+            { id: 2 },
+            { id: 5 },
+            { id: 5 },
+        ]);
+        results = await fauxSQL(
+            `
+            SELECT id
+            FROM ${testName}
+            WHERE height like "_ed\\_tall"
+            `,
+        );
+        expect(results).toEqual([
+            { id: 4 },
+        ]);
+    });
+
+    it('handles where in', async () => {
+        expect.assertions(2);
+        let results = await fauxSQL(
+            `
+            SELECT name
+            FROM ${testName}
+            WHERE name IN ('John Doe', 'Willy Wonka')
+            `,
+        );
+        expect(results).toEqual([
+            { name: 'John Doe' },
+            { name: 'Willy Wonka' },
+        ]);
+        results = await fauxSQL(
+            `
+            SELECT name
+            FROM ${testName}
+            WHERE name NOT IN ('John Doe', 'Willy Wonka')
+            `,
+        );
+        expect(results).toEqual([
+            { name: 'Aaron A Aaronson' },
+            { name: 'Sally Ride' },
+            { name: 'Noah Dupe' },
+            { name: 'Noah Dupe' },
         ]);
     });
 

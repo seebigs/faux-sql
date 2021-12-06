@@ -62,7 +62,8 @@ const filters = {
                 return left[index] || right[index];
             }, stopAfter);
         }
-        if (binaryOperator === 'LIKE') {
+        if (binaryOperator === 'LIKE' || binaryOperator === 'NOT LIKE') {
+            const not = binaryOperator === 'NOT LIKE';
             return filter(data, (row) => {
                 const compareLeft = parseValue(where.left, row);
                 let compareRight = parseValue(where.right, row);
@@ -72,10 +73,24 @@ const filters = {
                 if (compareRight.charAt(compareRight.length - 1) !== '%') {
                     compareRight = `${compareRight}$`;
                 }
-                const regex = new RegExp(compareRight.replaceAll('%', '.*'));
+                const regex = new RegExp(compareRight.replaceAll('%', '.*').replaceAll(/(?<!\\)_/g, '.'));
                 const match = compareLeft.match(regex);
-                return where.hasNot ? !match : match;
+                return not ? !match : match;
             }, stopAfter);
+        }
+        if (binaryOperator === 'IN' || binaryOperator === 'NOT IN') {
+            const not = binaryOperator === 'NOT IN';
+            return filter(data, (row) => {
+                let isInList = false;
+                const compareLeft = parseValue(where.left, row);
+                each(where.right.value, (listItem) => {
+                    if (compareLeft === parseValue(listItem, row)) {
+                        isInList = true;
+                        return false; // drop out of loop
+                    }
+                });
+                return not ? !isInList : isInList;
+            });
         }
         throw new Error(`WHERE binaryOperator ${binaryOperator} type not yet supported`);
     },

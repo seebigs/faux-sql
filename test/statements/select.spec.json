@@ -35,7 +35,7 @@
       "name": "Aaron A Aaronson",
       "type": "admin",
       "hat": "red",
-      "height": "tall",
+      "height": "_med_tall",
       "age": 55
     },
     "1": {
@@ -43,7 +43,7 @@
       "name": "John Doe",
       "type": "admin",
       "hat": "blue",
-      "height": "tall",
+      "height": "med-tall",
       "age": 15
     },
     "2": {
@@ -59,7 +59,7 @@
       "name": "Willy Wonka",
       "type": "member",
       "hat": "blue",
-      "height": "tall",
+      "height": "med_tall",
       "age": 22
     },
     "4": {
