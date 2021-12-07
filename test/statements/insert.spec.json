@@ -10,7 +10,7 @@
       "length": 100,
       "default": {
         "type": "value",
-        "value": "Nimo"
+        "value": "Morpheus"
       }
     },
     "last_login": {
@@ -22,6 +22,9 @@
       }
     }
   },
-  "primary": "id",
+  "primary": [
+    "id",
+    "last_login"
+  ],
   "data": null
 }

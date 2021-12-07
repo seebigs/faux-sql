@@ -8,6 +8,8 @@
       "length": 100
     }
   },
-  "primary": "id",
+  "primary": [
+    "id"
+  ],
   "data": null
 }

@@ -48,8 +48,8 @@ describe(testName, () => {
         expect.assertions(1);
         await fauxSQL(
             `
-            INSERT INTO ${testName} (name, last_login)
-            VALUES ('Morpheus', getdate())
+            INSERT INTO ${testName} (last_login)
+            VALUES (getdate())
             `,
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
@@ -72,7 +72,7 @@ describe(testName, () => {
     });
 
     it('handles on duplicate update', async () => {
-        expect.assertions(1);
+        expect.assertions(2);
         await fauxSQL(
             `
             INSERT INTO ${testName} (id, name)
@@ -81,9 +81,24 @@ describe(testName, () => {
             last_login = "today"
             `,
         );
-        const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        let table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
             0: { id: 1, name: 2, last_login: 3 },
+            1: { id: 2, name: 'Bill', last_login: 'today' },
+            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
+            3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },
+        });
+        await fauxSQL(
+            `
+            INSERT INTO ${testName} (id, name, last_login)
+            VALUES (1, 'different', 3)
+            ON DUPLICATE KEY UPDATE
+            name = "Waldo"
+            `,
+        );
+        table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        expect(table.data).toEqual({
+            0: { id: 1, name: 'Waldo', last_login: 3 },
             1: { id: 2, name: 'Bill', last_login: 'today' },
             2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
             3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },

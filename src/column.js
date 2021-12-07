@@ -37,7 +37,7 @@ export function addColumn(table, def) {
     }
 
     if (def.unique_or_primary === 'primary key') {
-        table.primary = columnName;
+        table.primary.push(columnName);
     }
 
     table.columns[columnName] = column;
@@ -45,13 +45,15 @@ export function addColumn(table, def) {
 
 export function addConstraint(table, constraint) {
     if (constraint.constraint_type.indexOf('primary') >= 0) {
-        [table.primary] = constraint.definition; // TODO when more than one column is primary
+        table.primary = constraint.definition;
     }
 }
 
 export function dropColumn(table, name) {
-    if (table.primary === name) {
-        table.primary = null;
+    const primIndex = table.primary.indexOf(name);
+    if (primIndex >= 0) {
+        delete table.primary[primIndex];
+        if (!table.primary.length) { table.primary = null; }
     }
     each(table.data, (record) => {
         delete record[name];

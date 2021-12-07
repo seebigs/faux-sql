@@ -22,8 +22,12 @@ export default async function insert(parsed) {
             const record = {};
             let tableColumnIndex = 0;
             const uniqueKeys = [];
+            table.primary = table.primary || [];
+            if (table.primary.length) {
+                uniqueKeys.push(table.primary);
+            }
             each(table.columns, (tableColumn, columnName) => {
-                if (tableColumn.unique || table.primary === columnName) { uniqueKeys.push(columnName); }
+                if (tableColumn.unique) { uniqueKeys.push([columnName]); }
                 const columnIndex = parsed.columns ? parsed.columns.indexOf(columnName) : tableColumnIndex;
                 let val;
                 const expr = evalExpression(value[columnIndex]);
@@ -41,7 +45,7 @@ export default async function insert(parsed) {
                         }
                     }
                 }
-                const mustNotBeNull = tableColumn.not_null || table.primary === columnName;
+                const mustNotBeNull = tableColumn.not_null || table.primary.indexOf(columnName) >= 0;
                 if (mustNotBeNull && (val === null || typeof val === 'undefined')) {
                     throw new Error(`${tableName} ${columnName} cannot be NULL`);
                 }
@@ -52,13 +56,18 @@ export default async function insert(parsed) {
                 tableColumnIndex += 1;
             });
             const duplicates = filter(table.data, (otherRow) => {
-                let fullMatch = true;
-                each(uniqueKeys, (key) => {
-                    if (otherRow[key] !== record[key]) {
-                        fullMatch = false;
-                    }
+                let isDupe = false;
+                each(uniqueKeys, (keyCombo) => {
+                    let matchesAllKeys = true;
+                    each(keyCombo, (key) => {
+                        if (otherRow[key] !== record[key]) {
+                            matchesAllKeys = false;
+                        }
+                    });
+                    isDupe = matchesAllKeys;
+                    if (isDupe) { return false; }
                 });
-                return fullMatch;
+                return isDupe;
             });
             if (Object.keys(duplicates).length) {
                 const onDupeUpdate = parsed.on_duplicate_update;

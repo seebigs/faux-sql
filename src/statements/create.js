@@ -1,6 +1,6 @@
 import each from 'seebigs-each';
 import { readTable, createTable, getTablePath } from '../database.js';
-import { addColumn } from '../column.js';
+import { addColumn, addConstraint } from '../column.js';
 
 export default async function create(parsed) {
     if (parsed.keyword === 'table') {
@@ -17,11 +17,16 @@ export default async function create(parsed) {
 
             const table = {
                 columns: {},
-                primary: null,
+                primary: [],
                 data: null,
             };
             each(parsed.create_definitions, (definition) => {
-                addColumn(table, definition);
+                const { resource } = definition;
+                if (resource === 'column') {
+                    addColumn(table, definition);
+                } else if (resource === 'constraint') {
+                    addConstraint(table, definition);
+                }
             });
 
             await createTable(tablePath, table);

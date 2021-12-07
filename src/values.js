@@ -18,16 +18,16 @@ export default function parseValue(input, source) {
         }
         if (type === 'binary_expr') {
             if (operator === '*') {
-                return parseValue(input.left) * parseValue(input.right);
+                return parseValue(input.left, source) * parseValue(input.right, source);
             }
             if (operator === '/') {
-                return parseValue(input.left) / parseValue(input.right);
+                return parseValue(input.left, source) / parseValue(input.right, source);
             }
             if (operator === '+') {
-                return parseValue(input.left) + parseValue(input.right);
+                return parseValue(input.left, source) + parseValue(input.right, source);
             }
             if (operator === '-') {
-                return parseValue(input.left) - parseValue(input.right);
+                return parseValue(input.left, source) - parseValue(input.right, source);
             }
         }
         return value;

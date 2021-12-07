@@ -37,7 +37,10 @@ describe(testName, () => {
                     length: 255,
                 },
             },
-            primary: 'email',
+            primary: [
+                'id',
+                'email',
+            ],
             data: null,
         });
     });

@@ -28,7 +28,9 @@
       "type": "INT"
     }
   },
-  "primary": "id",
+  "primary": [
+    "id"
+  ],
   "data": {
     "0": {
       "id": 1,

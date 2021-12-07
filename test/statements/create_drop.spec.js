@@ -56,7 +56,42 @@ describe(testName, () => {
                     },
                 },
             },
-            primary: 'id',
+            primary: ['id'],
+            data: null,
+        });
+    });
+
+    it('handles multi primary keys', async () => {
+        expect.assertions(1);
+        try {
+            unlinkSync(testTablePath);
+        } catch (err) {
+            // file already does not exist
+        }
+        await fauxSQL(
+            `
+            CREATE TABLE ${testName}
+            (id int, name varchar(100), age int, PRIMARY KEY (id, name))
+            `,
+        );
+        const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        expect(table).toEqual({
+            columns: {
+                id: {
+                    type: 'INT',
+                },
+                name: {
+                    type: 'VARCHAR',
+                    length: 100,
+                },
+                age: {
+                    type: 'INT',
+                },
+            },
+            primary: [
+                'id',
+                'name',
+            ],
             data: null,
         });
     });
@@ -123,7 +158,7 @@ describe(testName, () => {
                     length: 100,
                 },
             },
-            primary: null,
+            primary: [],
             data: null,
         });
     });
