@@ -1,6 +1,6 @@
 import each from 'seebigs-each';
 import { filter } from './utils.js';
-import parseValue from './values.js';
+import { parseValue } from './values.js';
 
 function parseLeftRight(left, right, row) {
     return {

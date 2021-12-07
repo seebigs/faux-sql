@@ -24,7 +24,7 @@ describe(testName, () => {
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
-            0: { id: 1, name: 2, last_login: 3 },
+            0: { id: 1, name: '2', last_login: '3' },
         });
     });
 
@@ -38,9 +38,9 @@ describe(testName, () => {
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
-            0: { id: 1, name: 2, last_login: 3 },
-            1: { id: 2, name: 'Bill', last_login: expect.any(Number) },
-            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
+            0: { id: 1, name: '2', last_login: '3' },
+            1: { id: 2, name: 'Bill', last_login: expect.any(String) },
+            2: { id: 3, name: 'Ted', last_login: expect.any(String) },
         });
     });
 
@@ -54,10 +54,10 @@ describe(testName, () => {
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
-            0: { id: 1, name: 2, last_login: 3 },
-            1: { id: 2, name: 'Bill', last_login: expect.any(Number) },
-            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
-            3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },
+            0: { id: 1, name: '2', last_login: '3' },
+            1: { id: 2, name: 'Bill', last_login: expect.any(String) },
+            2: { id: 3, name: 'Ted', last_login: expect.any(String) },
+            3: { id: 4, name: 'Morpheus', last_login: expect.any(String) },
         });
     });
 
@@ -83,10 +83,10 @@ describe(testName, () => {
         );
         let table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
-            0: { id: 1, name: 2, last_login: 3 },
+            0: { id: 1, name: '2', last_login: '3' },
             1: { id: 2, name: 'Bill', last_login: 'today' },
-            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
-            3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },
+            2: { id: 3, name: 'Ted', last_login: expect.any(String) },
+            3: { id: 4, name: 'Morpheus', last_login: expect.any(String) },
         });
         await fauxSQL(
             `
@@ -98,10 +98,10 @@ describe(testName, () => {
         );
         table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table.data).toEqual({
-            0: { id: 1, name: 'Waldo', last_login: 3 },
+            0: { id: 1, name: 'Waldo', last_login: '3' },
             1: { id: 2, name: 'Bill', last_login: 'today' },
-            2: { id: 3, name: 'Ted', last_login: expect.any(Number) },
-            3: { id: 4, name: 'Morpheus', last_login: expect.any(Number) },
+            2: { id: 3, name: 'Ted', last_login: expect.any(String) },
+            3: { id: 4, name: 'Morpheus', last_login: expect.any(String) },
         });
     });
 

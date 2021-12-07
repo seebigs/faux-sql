@@ -2,6 +2,7 @@ import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
 import evalExpression from '../expressions.js';
 import { filter } from '../utils.js';
+import { coerceValue } from '../values.js';
 
 export default async function insert(parsed) {
     for (const tableObj of parsed.table) {
@@ -49,9 +50,8 @@ export default async function insert(parsed) {
                 if (mustNotBeNull && (val === null || typeof val === 'undefined')) {
                     throw new Error(`${tableName} ${columnName} cannot be NULL`);
                 }
-                // TODO enforce type coersion using tableColumn
                 if (typeof val !== 'undefined') {
-                    record[columnName] = val;
+                    record[columnName] = coerceValue(val, tableColumn.type);
                 }
                 tableColumnIndex += 1;
             });

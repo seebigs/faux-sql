@@ -1,6 +1,6 @@
 import each from 'seebigs-each';
 import { getTablePath, readTable } from '../database.js';
-import parseValue from '../values.js';
+import { parseValue } from '../values.js';
 import { distinctValues, eachReverse, getSortFn } from '../utils.js';
 import evalExpression from '../expressions.js';
 import whereFilters from '../where.js';

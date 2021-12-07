@@ -1,5 +1,16 @@
 import each from 'seebigs-each';
-import parseValue from './values.js';
+import { parseValue } from './values.js';
+
+function getNow() {
+    const d = new Date();
+    const yyyy = d.getFullYear();
+    const mm = (d.getMonth() + 1).toString().padStart(2, '0');
+    const dd = d.getDate().toString().padStart(2, '0');
+    const h = d.getHours().toString().padStart(2, '0');
+    const m = d.getMinutes().toString().padStart(2, '0');
+    const s = d.getSeconds().toString().padStart(2, '0');
+    return `${yyyy}-${mm}-${dd} ${h}:${m}:${s}`;
+}
 
 const functions = {
     concat: (colExpr, row) => {
@@ -9,9 +20,8 @@ const functions = {
         });
         return str;
     },
-    getdate: () => {
-        return Date.now();
-    },
+    getdate: getNow,
+    now: getNow,
 };
 
 const aggrFunctions = {

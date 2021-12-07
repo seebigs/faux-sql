@@ -33,12 +33,12 @@ describe(testName, () => {
             1: {
                 id: 2,
                 name: 'OOO',
-                last_login: expect.any(Number),
+                last_login: expect.any(String),
             },
             2: {
                 id: 3,
                 name: 'OOO',
-                last_login: expect.any(Number),
+                last_login: expect.any(String),
             },
         });
     });
