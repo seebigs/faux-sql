@@ -19,7 +19,7 @@ describe(testName, () => {
         await fauxSQL(
             `
             UPDATE ${testName}
-            SET last_login=getdate(), foo=bar, name='OOO'
+            SET last_login=getdate(), id=id+1, name='OOO'
             WHERE id>1 AND name!=NULL
             `,
         );
@@ -31,12 +31,12 @@ describe(testName, () => {
                 last_login: 3,
             },
             1: {
-                id: 2,
+                id: 3,
                 name: 'OOO',
                 last_login: expect.any(String),
             },
             2: {
-                id: 3,
+                id: 4,
                 name: 'OOO',
                 last_login: expect.any(String),
             },
