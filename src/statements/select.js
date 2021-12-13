@@ -58,7 +58,7 @@ export default async function select(parsed) {
         stopAfter = limits[0].value;
     }
 
-    /** SELECT **/
+    /** SELECT ALL **/
     if (selectors === '*') {
         const allColumns = Object.keys(columns || data[0]);
         selectors = allColumns.map((key) => {
@@ -78,7 +78,7 @@ export default async function select(parsed) {
         data = whereFilters(where, data, stopAfter);
     }
 
-    /** GROUP & DISTINCT **/
+    /** GROUP **/
     let groups = selectors;
     if (groupby) {
         groups = [];
@@ -86,7 +86,7 @@ export default async function select(parsed) {
             groups.push(resolveIdentifier(groupByItem, selectors, 'group'));
         });
     }
-    let records = {};
+    const records = {};
     if (groupby) {
         const buckets = {};
         each(data, (result) => {
@@ -99,64 +99,77 @@ export default async function select(parsed) {
 
         each(buckets, (bucketValues, bucketKey) => {
             const bucket = distinct ? distinctValues(bucketValues) : bucketValues;
-            const result = {};
-            const row = bucket[0];
-            each(selectors, (sel) => {
-                const expr = evalExpression(sel.expr, row, bucket, sel.as, {
-                    column_ref: () => {
-                        return groups.indexOf(sel.expr.column) >= 0;
-                    },
-                });
-                if (expr) {
-                    result[expr.key] = expr.value;
-                }
-            });
-            records[bucketKey] = result;
+            records[bucketKey] = bucket;
         });
 
     } else {
-        let resultCount = 0;
         each(data, (row, index) => {
-            const result = {};
-            each(selectors, (sel) => {
-                const expr = evalExpression(sel.expr, row, data, sel.as);
-                if (expr) {
-                    result[expr.key] = expr.value;
-                }
-            });
-            records[index] = result;
-            resultCount += 1;
-            if (stopAfter && resultCount >= stopAfter) {
-                return false; // drop out of loop
-            }
+            records[index] = row;
         });
-        if (distinct && resultCount > 1) {
-            records = distinctValues(records);
-        }
     }
 
     /** HAVING **/
     // TODO
 
-    let results = Object.values(records);
+    const results = Object.values(records);
 
     /** ORDER BY **/
     if (orderby) {
         eachReverse(orderby, (orderByItem) => {
             const order = resolveIdentifier(orderByItem.expr, selectors, 'order');
-            results.sort(getSortFn(order, orderByItem.type));
+            const sortFn = getSortFn(order, orderByItem.type);
+            if (groupby) {
+                results.sort((a, b) => {
+                    return sortFn(a[0], b[0]);
+                });
+            } else {
+                results.sort(sortFn);
+            }
         });
+    }
+
+    /** SELECT **/
+    let selectedResults = [];
+    let resultCount = 0;
+    each(results, (fullResult) => {
+        const result = {};
+        each(selectors, (sel) => {
+            const conditions = !groupby ? {} : {
+                column_ref: () => {
+                    return groups.indexOf(sel.expr.column) >= 0;
+                },
+            };
+            let expr;
+            if (groupby) {
+                expr = evalExpression(sel.expr, fullResult[0], fullResult, sel.as, conditions);
+            } else {
+                expr = evalExpression(sel.expr, fullResult, data, sel.as, conditions);
+            }
+            if (expr) {
+                result[expr.key] = expr.value;
+            }
+        });
+        selectedResults.push(result);
+        resultCount += 1;
+        if (stopAfter && resultCount >= stopAfter) {
+            return false; // drop out of loop
+        }
+    });
+
+    /** DISTINCT **/
+    if (distinct && resultCount > 1) {
+        selectedResults = distinctValues(selectedResults);
     }
 
     /** LIMIT **/
     if (limits) {
         if (limits.length > 1) {
             const limitsLen = parseInt(parseValue(limits[0]), 10) + parseInt(parseValue(limits[1]), 10);
-            results = results.slice(parseValue(limits[0]), limitsLen);
+            selectedResults = selectedResults.slice(parseValue(limits[0]), limitsLen);
         } else {
-            results = results.slice(0, parseValue(limits[0]));
+            selectedResults = selectedResults.slice(0, parseValue(limits[0]));
         }
     }
 
-    return Object.values(results);
+    return selectedResults;
 }

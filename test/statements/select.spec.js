@@ -169,8 +169,8 @@ describe(testName, () => {
     });
 
     it('handles order by', async () => {
-        expect.assertions(1);
-        const results = await fauxSQL(
+        expect.assertions(2);
+        let results = await fauxSQL(
             `
             SELECT distinct id, hat
             FROM ${testName}
@@ -183,6 +183,20 @@ describe(testName, () => {
             { id: 5, hat: 'blue' },
             { id: 4, hat: 'blue' },
             { id: 2, hat: 'blue' },
+        ]);
+        results = await fauxSQL(
+            `
+            SELECT distinct name
+            FROM ${testName}
+            ORDER BY age
+            `,
+        );
+        expect(results).toEqual([
+            { name: 'John Doe' },
+            { name: 'Noah Dupe' },
+            { name: 'Willy Wonka' },
+            { name: 'Sally Ride' },
+            { name: 'Aaron A Aaronson' },
         ]);
     });
 

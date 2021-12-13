@@ -1,13 +1,25 @@
 import each from 'seebigs-each';
 
 export function distinctValues(results) {
-    const distinct = {};
+    let distinct;
+    let setValue;
+    if (Array.isArray(results)) {
+        distinct = [];
+        setValue = (value) => {
+            distinct.push(value);
+        };
+    } else {
+        distinct = {};
+        setValue = (value, key) => {
+            distinct[key] = value;
+        };
+    }
     const map = new Map();
     each(results, (record, index) => {
         const objstr = JSON.stringify(record); // crude but simplest
         if (!map.has(objstr)) {
             map.set(objstr, 1);
-            distinct[index] = record;
+            setValue(record, index);
         }
     });
     return distinct;
