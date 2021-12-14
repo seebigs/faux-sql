@@ -1,6 +1,6 @@
 {
   "name": "faux-sql",
-  "version": "0.1.0",
+  "version": "0.2.0",
   "type": "module",
   "description": "A local JSON database using standard MySQL queries. The fastest way to get a database into your project.",
   "keywords": ["database", "json", "local", "mysql", "development", "readable", "simple", "lightweight", "javascript"],
@@ -29,13 +29,13 @@
   "dependencies": {
     "minimist": "^1.2.5",
     "mkdirp": "^1.0.4",
-    "node-sql-parser": "^4.0.0",
+    "node-sql-parser": "^4.0.3",
     "seebigs-each": "^1.1.0"
   },
   "devDependencies": {
-    "eslint": "^8.3.0",
+    "eslint": "^8.4.1",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.25.3",
-    "jest": "^27.3.1"
+    "jest": "^27.4.5"
   }
 }
