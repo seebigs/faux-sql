@@ -148,6 +148,17 @@ DROP TABLE users
 `)
 ```
 
+## SHOW
+```js
+sql(`
+SHOW DATABASES
+`)
+
+sql(`
+SHOW TABLES
+`)
+```
+
 # Currently Unsupported
 There are some MySQL features that are not yet supported. Please create an issue if you'd like to see a certain feature added.
 

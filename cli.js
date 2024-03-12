@@ -7,7 +7,7 @@ const args = minimist(process.argv.slice(2));
 const statements = args._;
 
 if (statements.length) {
-    const fauxSQL = new FauxSQL(args);
+    const fauxSQL = new FauxSQL(args, true);
     statements.forEach(async (statement) => {
         try {
             const results = await fauxSQL(statement);

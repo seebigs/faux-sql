@@ -1,0 +1,21 @@
+{
+  "columns": {
+    "id": {
+      "type": "INT"
+    },
+    "name": {
+      "type": "VARCHAR",
+      "length": 50
+    }
+  },
+  "data": {
+    "0": {
+      "id": 1,
+      "name": "Mario"
+    },
+    "1": {
+      "id": 2,
+      "name": "Luigi"
+    }
+  }
+}

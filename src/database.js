@@ -1,6 +1,12 @@
 import { dirname, join } from 'path';
-import { readFile, rm, writeFile } from 'fs/promises';
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
+import {
+    readFile,
+    readdir,
+    rm,
+    stat,
+    writeFile,
+} from 'fs/promises';
 
 export function getTablePath(filePath, tableObj) {
     const tableName = tableObj.table;
@@ -33,4 +39,35 @@ export async function createTable(tablePath, table) {
 
 export async function dropTable(tablePath) {
     return rm(tablePath, { force: true });
+}
+
+export async function listFiles(filesPath) {
+    const dirs = [];
+    const databases = { default: {} };
+    const allFiles = await readdir(filesPath);
+    for (const file of allFiles) {
+        const filePath = `${filesPath}/${file}`;
+        const fileName = file.split('.')[0];
+        if ((await stat(filePath)).isDirectory()) {
+            dirs.push(fileName);
+        } else {
+            const tableData = await readTable(filePath);
+            if (tableData) {
+                delete tableData.data; // strips all records
+                databases.default[fileName] = tableData;
+            }
+        }
+    }
+    for (const dir of dirs) {
+        const allSubFiles = await readdir(`${filesPath}/${dir}`);
+        for (const subfile of allSubFiles) {
+            const subFilePath = `${filesPath}/${dir}/${subfile}`;
+            const subFileName = subfile.split('.')[0];
+            const tableData = await readTable(subFilePath);
+            delete tableData.data;
+            databases[dir] = databases[dir] || {};
+            databases[dir][subFileName] = tableData;
+        }
+    }
+    return databases;
 }

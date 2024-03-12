@@ -7,6 +7,7 @@ import del from './src/statements/delete.js';
 import drop from './src/statements/drop.js';
 import insert from './src/statements/insert.js';
 import select from './src/statements/select.js';
+import show from './src/statements/show.js';
 import truncate from './src/statements/truncate.js';
 import update from './src/statements/update.js';
 
@@ -17,11 +18,12 @@ const executors = {
     drop,
     insert,
     select,
+    show,
     truncate,
     update,
 };
 
-export default function FauxSQL({ filePath } = {}) {
+export default function FauxSQL({ filePath } = {}, usingCLI = false) {
 
     async function fauxSQL(statement = '') {
         let parsed = {};
@@ -43,7 +45,7 @@ export default function FauxSQL({ filePath } = {}) {
         if (parsed.type) {
             const executor = executors[parsed.type];
             if (typeof executor === 'function') {
-                return executor(parsed);
+                return executor(parsed, usingCLI);
             }
             throw new UnsupportedError(`"${parsed.type}" query type not yet supported`);
         } else {
