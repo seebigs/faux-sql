@@ -1,5 +1,6 @@
 import each from 'seebigs-each';
 import { parseValue } from './values.js';
+import { UnsupportedError } from './errors.js';
 
 function getNow() {
     const d = new Date();
@@ -71,7 +72,7 @@ function fnExec(colExpr, row) {
     if (typeof fn === 'function') {
         return fn(colExpr, row);
     }
-    throw new Error(`${colExpr.name} function not yet supported`);
+    throw new UnsupportedError(`${colExpr.name} function not yet supported`);
 }
 
 function aggrFnExec(colExpr, records) {
@@ -79,7 +80,7 @@ function aggrFnExec(colExpr, records) {
     if (typeof fn === 'function') {
         return fn(colExpr, records);
     }
-    throw new Error(`${colExpr.name} function not yet supported`);
+    throw new UnsupportedError(`${colExpr.name} function not yet supported`);
 }
 
 function fnToString(expression) {

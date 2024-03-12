@@ -4,6 +4,7 @@ import { parseValue } from '../values.js';
 import { distinctValues, eachReverse, getSortFn } from '../utils.js';
 import evalExpression from '../expressions.js';
 import whereFilters from '../where.js';
+import { SchemaError } from '../errors.js';
 
 function resolveIdentifier(item, references, statementType) {
     const itemType = item.type;
@@ -18,7 +19,7 @@ function resolveIdentifier(item, references, statementType) {
             }
             throw new Error(`Can't ${statementType} by ${identifier.expr.type}`);
         } else {
-            throw new Error(`Unknown column ${item.value} in ${statementType} statement`);
+            throw new SchemaError(`Unknown column ${item.value} in ${statementType} statement`);
         }
     }
 }
@@ -32,7 +33,7 @@ export default async function select(parsed) {
         const { tableName, tablePath } = getTablePath(parsed.filePath, parsed.from[0]);
         if (!tableName) { throw new Error('Please specify a table'); }
         table = await readTable(tablePath);
-        if (!table) { throw new Error(`Table '${tableName}' not found at ${tablePath}`); }
+        if (!table) { throw new SchemaError(`Table '${tableName}' not found at ${tablePath}`); }
     } else {
         table = {
             data: { 0: {} },
@@ -59,7 +60,7 @@ export default async function select(parsed) {
     }
 
     /** SELECT ALL **/
-    if (selectors === '*') {
+    if (selectors.length === 1 && selectors[0].expr.column === '*') {
         const allColumns = Object.keys(columns || data[0]);
         selectors = allColumns.map((key) => {
             return {

@@ -1,3 +1,3 @@
-import mkdirp from 'mkdirp';
+import { mkdirp } from 'mkdirp';
 
 mkdirp.sync(`${process.cwd()}/tmp`);

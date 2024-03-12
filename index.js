@@ -1,4 +1,5 @@
 import NodeSql from 'node-sql-parser';
+import { UnsupportedError } from './src/errors.js';
 
 import alter from './src/statements/alter.js';
 import create from './src/statements/create.js';
@@ -12,12 +13,12 @@ import update from './src/statements/update.js';
 const executors = {
     alter,
     create,
+    delete: del,
     drop,
+    insert,
     select,
     truncate,
-    insert,
     update,
-    delete: del,
 };
 
 export default function FauxSQL({ filePath } = {}) {
@@ -44,7 +45,7 @@ export default function FauxSQL({ filePath } = {}) {
             if (typeof executor === 'function') {
                 return executor(parsed);
             }
-            throw new Error(`"${parsed.type}" query type not yet supported`);
+            throw new UnsupportedError(`"${parsed.type}" query type not yet supported`);
         } else {
             throw new Error('Please provide a statement to be evaluated');
         }

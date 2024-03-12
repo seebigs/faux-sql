@@ -10,7 +10,7 @@ export function addColumn(table, def) {
     if (def.definition.length) {
         column.length = def.definition.length;
     }
-    if (def.unique_or_primary === 'unique') {
+    if (def.unique === 'unique') {
         column.unique = true;
     }
     if (def.nullable && def.nullable.value === 'not null') {
@@ -18,6 +18,10 @@ export function addColumn(table, def) {
     }
     if (def.auto_increment) {
         column.auto_increment = true;
+    }
+
+    if (def.primary_key === 'primary key') {
+        column.primary_key = true;
     }
 
     const defaultVal = def.default_val && def.default_val.value;
@@ -36,25 +40,21 @@ export function addColumn(table, def) {
         }
     }
 
-    if (def.unique_or_primary === 'primary key') {
-        table.primary.push(columnName);
-    }
-
     table.columns[columnName] = column;
 }
 
 export function addConstraint(table, constraint) {
-    if (constraint.constraint_type.indexOf('primary') >= 0) {
-        table.primary = constraint.definition;
+    if (constraint.constraint_type === 'primary key') {
+        const columnNames = constraint.definition.map((x) => x.column);
+        each(columnNames, (name) => {
+            if (table.columns[name]) {
+                table.columns[name].primary_key = true;
+            }
+        });
     }
 }
 
 export function dropColumn(table, name) {
-    const primIndex = table.primary.indexOf(name);
-    if (primIndex >= 0) {
-        delete table.primary[primIndex];
-        if (!table.primary.length) { table.primary = null; }
-    }
     each(table.data, (record) => {
         delete record[name];
     });
@@ -63,7 +63,9 @@ export function dropColumn(table, name) {
 
 export function dropKey(table, keyword) {
     if (keyword.indexOf('primary') >= 0) {
-        table.primary = null;
+        each(table.columns, (column) => {
+            delete column.primary_key;
+        });
     }
 }
 /* eslint-enable no-param-reassign */

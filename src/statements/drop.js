@@ -1,4 +1,5 @@
 import { dropTable, getTablePath } from '../database.js';
+import { UnsupportedError } from '../errors.js';
 
 export default async function drop(parsed) {
     if (parsed.keyword === 'table') {
@@ -7,6 +8,6 @@ export default async function drop(parsed) {
             await dropTable(tablePath);
         }
     } else {
-        throw new Error(`Drop ${parsed.keyword} not yet supported`);
+        throw new UnsupportedError(`Drop ${parsed.keyword} not yet supported`);
     }
 }

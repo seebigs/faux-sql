@@ -2,7 +2,8 @@
   "columns": {
     "id": {
       "type": "INT",
-      "auto_increment": true
+      "auto_increment": true,
+      "primary_key": true
     },
     "name": {
       "type": "VARCHAR",
@@ -22,9 +23,6 @@
       }
     }
   },
-  "primary": [
-    "id"
-  ],
   "data": {
     "0": {
       "id": 1,

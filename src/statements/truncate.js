@@ -1,4 +1,5 @@
 import { getTablePath, readTable, writeTable } from '../database.js';
+import { SchemaError, UnsupportedError } from '../errors.js';
 
 export default async function truncate(parsed) {
     if (parsed.keyword === 'table') {
@@ -6,11 +7,11 @@ export default async function truncate(parsed) {
             const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
 
             const table = await readTable(tablePath);
-            if (!table) { throw new Error(`Table ${tableName} not found at ${tablePath}`); }
+            if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
             table.data = null;
             await writeTable(tablePath, table);
         }
     } else {
-        throw new Error(`Truncate ${parsed.keyword} not yet supported`);
+        throw new UnsupportedError(`Truncate ${parsed.keyword} not yet supported`);
     }
 }

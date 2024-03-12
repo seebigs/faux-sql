@@ -1,34 +1,32 @@
 import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
 import evalExpression from '../expressions.js';
-import { filter } from '../utils.js';
 import { coerceValue } from '../values.js';
+import { ConstraintError, DuplicateError, SchemaError } from '../errors.js';
 
 export default async function insert(parsed) {
     for (const tableObj of parsed.table) {
         const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
 
         const table = await readTable(tablePath);
-        if (!table) { throw new Error(`Table ${tableName} not found at ${tablePath}`); }
+        if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
         table.data = table.data || {};
         let nextTableIndex = Object.keys(table.data).length;
 
         each(parsed.columns, (parsedColumn) => {
             if (!table.columns[parsedColumn]) {
-                throw new Error(`Unknown column '${parsedColumn}' in table '${tableName}'`);
+                throw new SchemaError(`Unknown column '${parsedColumn}' in table '${tableName}'`);
             }
         });
 
         each(parsed.values, ({ value }) => {
             const record = {};
             let tableColumnIndex = 0;
-            const uniqueKeys = [];
-            table.primary = table.primary || [];
-            if (table.primary.length) {
-                uniqueKeys.push(table.primary);
-            }
+            const uniqueColumns = [];
+
+            // Build a record to insert
             each(table.columns, (tableColumn, columnName) => {
-                if (tableColumn.unique) { uniqueKeys.push([columnName]); }
+                if (tableColumn.unique || tableColumn.primary_key) { uniqueColumns.push(columnName); }
                 const columnIndex = parsed.columns ? parsed.columns.indexOf(columnName) : tableColumnIndex;
                 let val;
                 const expr = evalExpression(value[columnIndex]);
@@ -46,44 +44,50 @@ export default async function insert(parsed) {
                         }
                     }
                 }
-                const mustNotBeNull = tableColumn.not_null || table.primary.indexOf(columnName) >= 0;
+                const mustNotBeNull = tableColumn.not_null || tableColumn.primary_key;
                 if (mustNotBeNull && (val === null || typeof val === 'undefined')) {
-                    throw new Error(`${tableName} ${columnName} cannot be NULL`);
+                    throw new ConstraintError(`${tableName} ${columnName} cannot be NULL`);
                 }
                 if (typeof val !== 'undefined') {
                     record[columnName] = coerceValue(val, tableColumn.type);
                 }
                 tableColumnIndex += 1;
             });
-            const duplicates = filter(table.data, (otherRow) => {
+
+            // Check for duplicate records
+            let duplicateFound = false;
+            const onDupeUpdate = parsed.on_duplicate_update;
+            each(table.data, (existingRow, existingIndex) => {
+                // is this existingRow a dupe of new record?
                 let isDupe = false;
-                each(uniqueKeys, (keyCombo) => {
-                    let matchesAllKeys = true;
-                    each(keyCombo, (key) => {
-                        if (otherRow[key] !== record[key]) {
-                            matchesAllKeys = false;
+                if (uniqueColumns.length) {
+                    let matchesAllUniques = true;
+                    each(uniqueColumns, (uniqueColumn) => {
+                        if (existingRow[uniqueColumn] !== record[uniqueColumn]) {
+                            matchesAllUniques = false;
                         }
+                        return false; // drop out of loop
                     });
-                    isDupe = matchesAllKeys;
-                    if (isDupe) { return false; }
-                });
-                return isDupe;
-            });
-            if (Object.keys(duplicates).length) {
-                const onDupeUpdate = parsed.on_duplicate_update;
-                if (onDupeUpdate) {
-                    each(duplicates, (dupe, dupeIndex) => {
+                    isDupe = matchesAllUniques;
+                }
+                // if yes, either update or error
+                if (isDupe) {
+                    duplicateFound = true;
+                    if (onDupeUpdate) {
                         each(onDupeUpdate.set, (set) => {
-                            const expr = evalExpression(set.value, dupe, table.data);
+                            const expr = evalExpression(set.value, existingRow, table.data);
                             if (expr) {
-                                table.data[dupeIndex][set.column] = expr.value;
+                                table.data[existingIndex][set.column] = expr.value;
                             }
                         });
-                    });
-                } else {
-                    throw new Error(`Duplicate entry for ${JSON.stringify(record)}`);
+                    } else {
+                        throw new DuplicateError(`Duplicate record in \`${tableName}\` for ${JSON.stringify(record)}`);
+                    }
                 }
-            } else {
+            });
+
+            // If not a duplicate, insert at bottom
+            if (!duplicateFound) {
                 table.data[nextTableIndex] = record;
                 nextTableIndex += 1;
             }

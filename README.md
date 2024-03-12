@@ -2,7 +2,6 @@
 A local JSON database using standard MySQL queries. The fastest way to get a database into your project.
 
 - Human readable, easy to edit data files
-- A free solution to get you started
 - Super easy to swap out for a real DB connection whenever you're ready
 - Database files can be checked-in with git/svn for easy collaboration
 
@@ -75,6 +74,18 @@ The above data will instead be stored at `./database/p2/users.json` and is disti
 # Supported Query Types
 In most cases, you can just use MySQL as you would normally and everything will just work
 
+## SELECT
+```js
+sql(`
+SELECT age, count(*) as total
+FROM users
+WHERE age > 18 AND name != NULL
+GROUP BY age
+ORDER BY age DESC
+LIMIT 10
+`)
+```
+
 ## CREATE
 ```js
 sql(`
@@ -85,10 +96,28 @@ age int
 )`)
 ```
 
-## DROP
+## INSERT
 ```js
 sql(`
-DROP TABLE users
+INSERT INTO users (name, age)
+VALUES ('Bill', 17), ('Ted', 21)
+`)
+```
+
+## DELETE
+```js
+sql(`
+DELETE FROM users
+WHERE id > 1
+`)
+```
+
+## UPDATE
+```js
+sql(`
+UPDATE users
+SET age = 23
+WHERE id = 2
 `)
 ```
 
@@ -105,42 +134,17 @@ sql(`
 ALTER TABLE users
 ADD email varchar(255) PRIMARY KEY
 `)
-```
 
-## INSERT
-```js
 sql(`
-INSERT INTO users (name, age)
-VALUES ('Bill', 17), ('Ted', 21)
+ALTER TABLE users
+DROP name
 `)
 ```
 
-## UPDATE
+## DROP
 ```js
 sql(`
-UPDATE users
-SET age = 23
-WHERE id = 2
-`)
-```
-
-## DELETE
-```js
-sql(`
-DELETE FROM users
-WHERE id > 1
-`)
-```
-
-## SELECT
-```js
-sql(`
-SELECT age, count(*) as total
-FROM users
-WHERE age > 18 AND name != NULL
-GROUP BY age
-ORDER BY age DESC
-LIMIT 10
+DROP TABLE users
 `)
 ```
 

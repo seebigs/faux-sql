@@ -3,13 +3,14 @@ import { getTablePath, readTable, writeTable } from '../database.js';
 import whereFilters from '../where.js';
 import evalExpression from '../expressions.js';
 import { coerceValue } from '../values.js';
+import { SchemaError } from '../errors.js';
 
 export default async function update(parsed) {
     for (const tableObj of parsed.table) {
         const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
 
         const table = await readTable(tablePath);
-        if (!table) { throw new Error(`Table ${tableName} not found at ${tablePath}`); }
+        if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
         const { set, where } = parsed;
         const { columns } = table;
         let { data } = table;
@@ -30,7 +31,7 @@ export default async function update(parsed) {
                         data[index][columnName] = coerceValue(expr.value, tableColumn.type);
                     }
                 } else {
-                    throw new Error(`Unknown column ${columnName} in ${tableName}`);
+                    throw new SchemaError(`Unknown column ${columnName} in ${tableName}`);
                 }
             });
         });

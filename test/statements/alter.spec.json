@@ -8,8 +8,10 @@
       "length": 100
     }
   },
-  "primary": [
-    "id"
-  ],
-  "data": null
+  "data": {
+    "0": {
+      "id": 1,
+      "name": "Person"
+    }
+  }
 }

@@ -1,13 +1,14 @@
 import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
 import whereFilters from '../where.js';
+import { SchemaError } from '../errors.js';
 
 export default async function del(parsed) {
     for (const tableObj of parsed.table) {
         const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
 
         const table = await readTable(tablePath);
-        if (!table) { throw new Error(`Table ${tableName} not found at ${tablePath}`); }
+        if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
         const { where } = parsed;
         let { data } = table;
 

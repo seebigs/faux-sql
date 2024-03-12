@@ -2,7 +2,8 @@
   "columns": {
     "id": {
       "type": "INT",
-      "auto_increment": true
+      "auto_increment": true,
+      "primary_key": true
     },
     "name": {
       "type": "VARCHAR",
@@ -15,6 +16,7 @@
     },
     "last_login": {
       "type": "DATE",
+      "primary_key": true,
       "default": {
         "type": "function",
         "name": "getdate",
@@ -22,9 +24,5 @@
       }
     }
   },
-  "primary": [
-    "id",
-    "last_login"
-  ],
   "data": null
 }

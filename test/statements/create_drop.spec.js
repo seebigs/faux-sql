@@ -5,6 +5,7 @@ import {
     writeFileSync,
 } from 'fs';
 import FauxSQL from '../../index.js';
+import { DuplicateError } from '../../src/errors.js';
 
 const filePath = `${process.cwd()}/tmp`;
 const fauxSQL = new FauxSQL({
@@ -36,6 +37,7 @@ describe(testName, () => {
                 id: {
                     type: 'INT',
                     auto_increment: true,
+                    primary_key: true,
                 },
                 name: {
                     type: 'VARCHAR',
@@ -56,7 +58,6 @@ describe(testName, () => {
                     },
                 },
             },
-            primary: ['id'],
             data: null,
         });
     });
@@ -79,19 +80,17 @@ describe(testName, () => {
             columns: {
                 id: {
                     type: 'INT',
+                    primary_key: true,
                 },
                 name: {
                     type: 'VARCHAR',
                     length: 100,
+                    primary_key: true,
                 },
                 age: {
                     type: 'INT',
                 },
             },
-            primary: [
-                'id',
-                'name',
-            ],
             data: null,
         });
     });
@@ -103,7 +102,7 @@ describe(testName, () => {
             CREATE TABLE ${testName}
             (id int, name varchar(100))
             `,
-        )).rejects.toThrow(new Error(`Table '${testName}' already exists`));
+        )).rejects.toThrow(new DuplicateError(`Table '${testName}' already exists`));
     });
 
     it('fails silently when "if_not_exists" is passed', async () => {
@@ -158,7 +157,6 @@ describe(testName, () => {
                     length: 100,
                 },
             },
-            primary: [],
             data: null,
         });
     });

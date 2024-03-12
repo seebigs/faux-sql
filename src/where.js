@@ -1,6 +1,7 @@
 import each from 'seebigs-each';
 import { filter } from './utils.js';
 import { parseValue } from './values.js';
+import { UnsupportedError } from './errors.js';
 
 function parseLeftRight(left, right, row) {
     return {
@@ -92,7 +93,7 @@ const filters = {
                 return not ? !isInList : isInList;
             });
         }
-        throw new Error(`WHERE binaryOperator ${binaryOperator} type not yet supported`);
+        throw new UnsupportedError(`WHERE binaryOperator ${binaryOperator} type not yet supported`);
     },
     bool: (data, where) => {
         return parseValue(where) ? data : [];
@@ -122,5 +123,5 @@ export default function whereFilters(where, data, stopAfter) {
     if (typeof whereFn === 'function') {
         return whereFn(data, where, stopAfter);
     }
-    throw new Error(`WHERE ${where.type} not yet supported`);
+    throw new UnsupportedError(`WHERE ${where.type} not yet supported`);
 }

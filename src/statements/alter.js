@@ -1,5 +1,6 @@
 import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
+import { SchemaError, UnsupportedError } from '../errors.js';
 import {
     addColumn,
     addConstraint,
@@ -12,7 +13,7 @@ export default async function alter(parsed) {
         const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
 
         const table = await readTable(tablePath);
-        if (!table) { throw new Error(`Table ${tableName} not found at ${tablePath}`); }
+        if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
 
         each(parsed.expr, (expr) => {
             const { action, resource } = expr;
@@ -29,7 +30,7 @@ export default async function alter(parsed) {
                     dropKey(table, expr.keyword);
                 }
             } else {
-                throw new Error(`Alter ${action} not yet supported`);
+                throw new UnsupportedError(`Alter ${action} not yet supported`);
             }
         });
 

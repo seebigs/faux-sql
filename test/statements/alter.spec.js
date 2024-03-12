@@ -14,7 +14,7 @@ describe(testName, () => {
 
     writeFileSync(testTablePath, JSON.stringify(testJSON, null, 2));
 
-    it('alters a table as expected', async () => {
+    it('adds a column', async () => {
         expect.assertions(1);
         await fauxSQL(
             `
@@ -35,13 +35,44 @@ describe(testName, () => {
                 email: {
                     type: 'VARCHAR',
                     length: 255,
+                    primary_key: true,
                 },
             },
-            primary: [
-                'id',
-                'email',
-            ],
-            data: null,
+            data: {
+                0: {
+                    id: 1,
+                    name: 'Person',
+                },
+            },
+        });
+    });
+
+    it('drops a column', async () => {
+        expect.assertions(1);
+        await fauxSQL(
+            `
+            ALTER TABLE ${testName}
+            DROP id
+            `,
+        );
+        const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        expect(table).toEqual({
+            columns: {
+                name: {
+                    type: 'VARCHAR',
+                    length: 100,
+                },
+                email: {
+                    type: 'VARCHAR',
+                    length: 255,
+                    primary_key: true,
+                },
+            },
+            data: {
+                0: {
+                    name: 'Person',
+                },
+            },
         });
     });
 
