@@ -1,6 +1,6 @@
 import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
-import whereFilters from '../where.js';
+import whereFilter from '../where.js';
 import evalExpression from '../expressions.js';
 import { coerceValue } from '../values.js';
 import { SchemaError } from '../errors.js';
@@ -13,27 +13,25 @@ export default async function update(parsed) {
         if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
         const { set, where } = parsed;
         const { columns } = table;
-        let { data } = table;
-
-        if (where) {
-            data = whereFilters(where, data);
-        }
+        const { data } = table;
 
         // TODO: orderby and limit?
 
         each(data, (row, index) => {
-            each(set, (mod) => {
-                const columnName = mod.column;
-                const tableColumn = columns[columnName];
-                if (tableColumn) {
-                    const expr = evalExpression(mod.value, row, table.data);
-                    if (expr) {
-                        data[index][columnName] = coerceValue(expr.value, tableColumn.type);
+            if (whereFilter(where, row)) {
+                each(set, (mod) => {
+                    const columnName = mod.column;
+                    const tableColumn = columns[columnName];
+                    if (tableColumn) {
+                        const expr = evalExpression(mod.value, row, table.data);
+                        if (expr) {
+                            data[index][columnName] = coerceValue(expr.value, tableColumn.type);
+                        }
+                    } else {
+                        throw new SchemaError(`Unknown column ${columnName} in ${tableName}`);
                     }
-                } else {
-                    throw new SchemaError(`Unknown column ${columnName} in ${tableName}`);
-                }
-            });
+                });
+            }
         });
 
         await writeTable(tablePath, table);

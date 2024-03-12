@@ -33,22 +33,6 @@ export function eachReverse(collection, iteratee, thisArg) {
     }
 }
 
-export function filter(collection, iteratee, stopAfter, thisArg) {
-    const ret = Array.isArray(collection) ? [] : {};
-    let resultCount = 0;
-    each(collection, (item, index) => {
-        const keep = iteratee.call(thisArg, item, index, collection);
-        if (keep) {
-            ret[index] = item;
-            resultCount += 1;
-            if (stopAfter && resultCount >= stopAfter) {
-                return false; // drop out of loop
-            }
-        }
-    });
-    return ret;
-}
-
 export function getSortFn(order, sortOpt) {
     const sort = sortOpt && sortOpt.toLowerCase();
 

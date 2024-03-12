@@ -40,6 +40,10 @@ describe(testName, () => {
                 name: 'OOO',
                 last_login: expect.any(String),
             },
+            3: {
+                id: 4,
+                last_login: 'yesterday',
+            },
         });
     });
 

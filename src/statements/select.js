@@ -3,8 +3,8 @@ import { getTablePath, readTable } from '../database.js';
 import { parseValue } from '../values.js';
 import { distinctValues, eachReverse, getSortFn } from '../utils.js';
 import evalExpression from '../expressions.js';
-import whereFilters from '../where.js';
-import { SchemaError } from '../errors.js';
+import whereFilter from '../where.js';
+import { SchemaError, UnsupportedError } from '../errors.js';
 
 function resolveIdentifier(item, references, statementType) {
     const itemType = item.type;
@@ -24,13 +24,13 @@ function resolveIdentifier(item, references, statementType) {
     }
 }
 
-export default async function select(parsed) {
+async function singleSelect(parsed, selectFrom) {
 
     /** FROM **/
     // TODO: allow multiple tables and joins (for...of)
     let table;
     if (parsed.from) {
-        const { tableName, tablePath } = getTablePath(parsed.filePath, parsed.from[0]);
+        const { tableName, tablePath } = getTablePath(parsed.filePath, selectFrom);
         if (!tableName) { throw new Error('Please specify a table'); }
         table = await readTable(tablePath);
         if (!table) { throw new SchemaError(`Table '${tableName}' not found at ${tablePath}`); }
@@ -41,7 +41,7 @@ export default async function select(parsed) {
     }
 
     const { columns } = table;
-    let { data = {} } = table;
+    const { data = {} } = table;
 
     let selectors = parsed.columns;
     const {
@@ -72,11 +72,6 @@ export default async function select(parsed) {
                 as: null,
             };
         });
-    }
-
-    /** WHERE **/
-    if (where) {
-        data = whereFilters(where, data, stopAfter);
     }
 
     /** GROUP **/
@@ -131,34 +126,35 @@ export default async function select(parsed) {
 
     /** SELECT **/
     let selectedResults = [];
-    let resultCount = 0;
     each(results, (fullResult) => {
-        const result = {};
-        each(selectors, (sel) => {
-            const conditions = !groupby ? {} : {
-                column_ref: () => {
-                    return groups.indexOf(sel.expr.column) >= 0;
-                },
-            };
-            let expr;
-            if (groupby) {
-                expr = evalExpression(sel.expr, fullResult[0], fullResult, sel.as, conditions);
-            } else {
-                expr = evalExpression(sel.expr, fullResult, data, sel.as, conditions);
-            }
-            if (expr) {
-                result[expr.key] = expr.value;
-            }
-        });
-        selectedResults.push(result);
-        resultCount += 1;
-        if (stopAfter && resultCount >= stopAfter) {
+        /** WHERE **/
+        if (whereFilter(where, fullResult)) {
+            const result = {};
+            each(selectors, (sel) => {
+                const conditions = !groupby ? {} : {
+                    column_ref: () => {
+                        return groups.indexOf(sel.expr.column) >= 0;
+                    },
+                };
+                let expr;
+                if (groupby) {
+                    expr = evalExpression(sel.expr, fullResult[0], fullResult, sel.as, conditions);
+                } else {
+                    expr = evalExpression(sel.expr, fullResult, data, sel.as, conditions);
+                }
+                if (expr) {
+                    result[expr.key] = expr.value;
+                }
+            });
+            selectedResults.push(result);
+        }
+        if (stopAfter && selectedResults.length >= stopAfter) {
             return false; // drop out of loop
         }
     });
 
     /** DISTINCT **/
-    if (distinct && resultCount > 1) {
+    if (distinct && selectedResults.length > 1) {
         selectedResults = distinctValues(selectedResults);
     }
 
@@ -173,4 +169,20 @@ export default async function select(parsed) {
     }
 
     return selectedResults;
+}
+
+// async function multiSelect(parsed, selectFrom) {
+//     const rawSelects = [];
+//     for (const fromObj of parsed.from) {
+//         rawSelects.push(await multiSelect(parsed, fromObj));
+//     }
+//     console.log(rawSelects);
+//     return rawSelects;
+// }
+
+export default async function select(parsed) {
+    if (parsed.from.length > 1) {
+        throw new UnsupportedError('Selecting from more than one table is not yet supported');
+    }
+    return singleSelect(parsed, parsed.from[0]);
 }
