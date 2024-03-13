@@ -39,6 +39,17 @@ export default async function select({
     const rawRecords = {};
     let primaryTable = { columns: {}, data: {} };
 
+    if (!from) {
+        const quickResult = [];
+        each(columns, (col) => {
+            const expr = evalExpression(col.expr, {}, {}, col.as);
+            if (expr) {
+                quickResult.push(expr.value);
+            }
+        });
+        return quickResult;
+    }
+
     /** FROM **/
     for (let i = 0; i < from.length; i += 1) {
         const {
@@ -104,7 +115,9 @@ export default async function select({
 
     let selectors = columns;
     if (selectors.length === 1 && selectors[0].expr.column === '*') {
-        const allColumns = Object.keys(Object.values(rawRecords)[0]);
+        const firstRecord = Object.values(rawRecords)[0];
+        if (!firstRecord) { return []; } // no records found
+        const allColumns = Object.keys(firstRecord);
         selectors = allColumns.map((key) => {
             return {
                 expr: {

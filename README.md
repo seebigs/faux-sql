@@ -159,10 +159,20 @@ SHOW TABLES
 `)
 ```
 
+## INNER JOIN
+```js
+sql(`
+SELECT t1.name, t2.fav_animal, t2.fav_food AS snack
+FROM users t1
+INNER JOIN favorites t2
+ON t1.id = t2.user_id
+`)
+```
+
 # Currently Unsupported
 There are some MySQL features that are not yet supported. Please create an issue if you'd like to see a certain feature added.
 
-- JOIN
+- OUTER JOINS
 - UNION
 - HAVING
 - DELETE/UPDATE using ORDER BY and LIMIT

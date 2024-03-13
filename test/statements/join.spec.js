@@ -27,22 +27,51 @@ describe(testName, () => {
         expect.assertions(1);
         const results = await fauxSQL(
             `
-            SELECT t1.name, t2.fav_animal, t2.fav_food AS snack
-            FROM ${testName} t1
-            INNER JOIN ${otherDatabaseName}.${test2Name} t2
-            ON t1.id = t2.user_id
+            SELECT name, fav_animal
+            FROM ${testName}
+            INNER JOIN ${otherDatabaseName}.${test2Name}
+            ON ${testName}.id = ${test2Name}.user_id
             `,
         );
         expect(results).toEqual([
             {
                 name: 'Aaron A Aaronson',
                 fav_animal: 'Aardvark',
-                snack: 'Apples',
             },
             {
                 name: 'John Doe',
                 fav_animal: 'Deer',
+            },
+            {
+                name: 'Sally Ride',
+            },
+            {
+                name: 'Willy Wonka',
+            },
+        ]);
+    });
+
+    it('handles a more complex inner join', async () => {
+        expect.assertions(1);
+        const results = await fauxSQL(
+            `
+            SELECT t1.name, t2.fav_animal, t2.fav_food AS snack
+            FROM ${testName} t1
+            INNER JOIN ${otherDatabaseName}.${test2Name} t2
+            ON t1.id = t2.user_id
+            ORDER BY 2 desc
+            `,
+        );
+        expect(results).toEqual([
+            {
+                name: 'John Doe',
+                fav_animal: 'Deer',
                 snack: 'Celery',
+            },
+            {
+                name: 'Aaron A Aaronson',
+                fav_animal: 'Aardvark',
+                snack: 'Apples',
             },
             {
                 name: 'Sally Ride',
