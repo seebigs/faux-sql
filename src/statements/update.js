@@ -4,6 +4,7 @@ import whereFilter from '../where.js';
 import evalExpression from '../expressions.js';
 import { coerceValue } from '../values.js';
 import { SchemaError } from '../errors.js';
+import { defaultTableName } from '../defaults.js';
 
 export default async function update(parsed) {
     for (const tableObj of parsed.table) {
@@ -18,7 +19,9 @@ export default async function update(parsed) {
         // TODO: orderby and limit?
 
         each(data, (row, index) => {
-            if (whereFilter(where, row)) {
+            const compareObject = {};
+            compareObject[defaultTableName] = row;
+            if (whereFilter(where, compareObject)) {
                 each(set, (mod) => {
                     const columnName = mod.column;
                     const tableColumn = columns[columnName];

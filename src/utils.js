@@ -33,18 +33,18 @@ export function eachReverse(collection, iteratee, thisArg) {
     }
 }
 
-export function getSortFn(order, sortOpt) {
+export function getSortFn(key, sortOpt) {
     const sort = sortOpt && sortOpt.toLowerCase();
 
     function sortAsc(a, b) {
-        if (a[order] < b[order]) { return -1; }
-        if (a[order] > b[order]) { return 1; }
+        if (a[key] < b[key]) { return -1; }
+        if (a[key] > b[key]) { return 1; }
         return 0;
     }
 
     function sortDesc(a, b) {
-        if (a[order] > b[order]) { return -1; }
-        if (a[order] < b[order]) { return 1; }
+        if (a[key] > b[key]) { return -1; }
+        if (a[key] < b[key]) { return 1; }
         return 0;
     }
 

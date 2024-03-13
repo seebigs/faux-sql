@@ -9,10 +9,12 @@ import {
 } from 'fs/promises';
 
 export function getTablePath(filePath, tableObj) {
+    const tableAlias = tableObj.as;
     const tableName = tableObj.table;
-    const dbName = tableObj.db || '';
-    const tablePath = join(filePath, `${dbName}/${tableName}.json`);
+    const tableDatabase = tableObj.db || '';
+    const tablePath = join(filePath, `${tableDatabase}/${tableName}.json`);
     return {
+        tableAlias,
         tableName,
         tablePath,
     };

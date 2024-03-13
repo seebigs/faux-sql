@@ -35,11 +35,40 @@ describe(testName, () => {
         ]);
     });
 
+    it('limits results when specified', async () => {
+        expect.assertions(1);
+        const results = await fauxSQL(
+            `
+            SELECT *
+            FROM ${testName}
+            LIMIT 2
+            `,
+        );
+        expect(results).toEqual([
+            {
+                id: 1,
+                name: 'Aaron A Aaronson',
+                type: 'admin',
+                hat: 'red',
+                height: '_med_tall',
+                age: 55,
+            },
+            {
+                id: 2,
+                name: 'John Doe',
+                type: 'admin',
+                hat: 'blue',
+                height: 'med-tall',
+                age: 15,
+            },
+        ]);
+    });
+
     it('handles distinct results', async () => {
         expect.assertions(2);
         const distinctSelect = await fauxSQL(
             `
-            SELECT distinct name
+            SELECT DISTINCT name
             FROM ${testName}
             `,
         );
@@ -73,7 +102,7 @@ describe(testName, () => {
         expect.assertions(1);
         const results = await fauxSQL(
             `
-            SELECT distinct hat, name
+            SELECT DISTINCT hat, name
             FROM ${testName}
             WHERE id>0 AND NOT id=2 OR name=NULL
             ORDER BY hat desc, 2 desc
@@ -157,7 +186,7 @@ describe(testName, () => {
         expect.assertions(1);
         const results = await fauxSQL(
             `
-            SELECT distinct count(*) as total, hat
+            SELECT DISTINCT count(*) as total, hat
             FROM ${testName}
             GROUP BY 2
             `,
@@ -172,7 +201,7 @@ describe(testName, () => {
         expect.assertions(2);
         let results = await fauxSQL(
             `
-            SELECT distinct id, hat
+            SELECT DISTINCT id, hat
             FROM ${testName}
             ORDER BY 2 desc, id desc
             `,
@@ -186,17 +215,17 @@ describe(testName, () => {
         ]);
         results = await fauxSQL(
             `
-            SELECT distinct name
+            SELECT DISTINCT name, age
             FROM ${testName}
             ORDER BY age
             `,
         );
         expect(results).toEqual([
-            { name: 'John Doe' },
-            { name: 'Noah Dupe' },
-            { name: 'Willy Wonka' },
-            { name: 'Sally Ride' },
-            { name: 'Aaron A Aaronson' },
+            { name: 'John Doe', age: 15 },
+            { name: 'Noah Dupe', age: 15 },
+            { name: 'Willy Wonka', age: 22 },
+            { name: 'Sally Ride', age: 33 },
+            { name: 'Aaron A Aaronson', age: 55 },
         ]);
     });
 

@@ -2,6 +2,7 @@ import each from 'seebigs-each';
 import { getTablePath, readTable, writeTable } from '../database.js';
 import { SchemaError } from '../errors.js';
 import whereFilter from '../where.js';
+import { defaultTableName } from '../defaults.js';
 
 export default async function del(parsed) {
     for (const tableObj of parsed.table) {
@@ -15,7 +16,9 @@ export default async function del(parsed) {
         // TODO: orderby and limit?
 
         each(data, (row, index) => {
-            if (whereFilter(where, row)) {
+            const compareObject = {};
+            compareObject[defaultTableName] = row;
+            if (whereFilter(where, compareObject)) {
                 delete table.data[index];
             }
         });

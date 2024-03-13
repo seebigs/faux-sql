@@ -42,6 +42,9 @@ export default function FauxSQL({ filePath } = {}, usingCLI = false) {
 
         // console.log(JSON.stringify(parsed, null, 4));
 
+        // https://learnsql.com/blog/sql-order-of-operations/
+        // https://medium.com/@shailav.shrestha/reference-types-of-sql-joins-4511cc802f02
+
         if (parsed.type) {
             const executor = executors[parsed.type];
             if (typeof executor === 'function') {
