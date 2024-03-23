@@ -40,11 +40,25 @@ export default async function getJoinedRecords(from, filePath) {
                 sourceData[recordTableKey] = recordItem;
             });
             let matchesAllFilters = true;
-            each(from, ({ on: joinOn }) => {
-                if (joinOn) {
-                    if (!whereFilter(joinOn, sourceData)) {
+            each(from, (parsedFrom) => {
+                if (parsedFrom.on) {
+                    if (!whereFilter(parsedFrom.on, sourceData)) {
                         matchesAllFilters = false;
                     }
+                } else if (parsedFrom.using) {
+                    const firstTableKey = from[0].as || from[0].table;
+                    const currTableKey = parsedFrom.as || parsedFrom.table;
+                    each(parsedFrom.using, (using) => {
+                        const joinWhere = {
+                            type: 'binary_expr',
+                            operator: '=',
+                            left: { type: 'column_ref', table: firstTableKey, column: using },
+                            right: { type: 'column_ref', table: currTableKey, column: using },
+                        };
+                        if (!whereFilter(joinWhere, sourceData)) {
+                            matchesAllFilters = false;
+                        }
+                    });
                 }
             });
             if (matchesAllFilters) {

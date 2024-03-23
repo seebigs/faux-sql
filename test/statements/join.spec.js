@@ -125,6 +125,39 @@ describe('join_test', () => {
             ]);
         });
 
+        it('handles inner join with using clause', async () => {
+            expect.assertions(1);
+            const results = await fauxSQL(
+                `
+                SELECT *
+                FROM ${testHobbies}
+                INNER JOIN ${otherDatabaseName}.${testFavs}
+                USING (user_id)
+                ORDER BY user_id
+                `,
+            );
+            expect(results).toEqual([
+                {
+                    user_id: 2,
+                    hobby: 'scuba',
+                    fav_animal: 'Deer',
+                    fav_food: 'Celery',
+                },
+                {
+                    user_id: 3,
+                    hobby: 'reading',
+                    fav_animal: null,
+                    fav_food: null,
+                },
+                {
+                    user_id: 4,
+                    hobby: 'hiking',
+                    fav_animal: null,
+                    fav_food: 'Candy',
+                },
+            ]);
+        });
+
     });
 
     describe('CROSS JOIN', () => {
