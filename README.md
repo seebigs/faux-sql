@@ -169,11 +169,39 @@ ON t1.id = t2.user_id
 `)
 ```
 
+## LEFT JOIN
+```js
+sql(`
+SELECT t1.name, t3.hobby
+FROM users t1
+LEFT JOIN hobbies t3
+ON t1.id = t3.user_id
+ORDER BY 1
+`)
+```
+
+## RIGHT JOIN
+```js
+sql(`
+SELECT t1.name, t3.hobby
+FROM users t1
+RIGHT JOIN hobbies t3
+ON t1.id = t3.user_id
+ORDER BY 2
+`)
+```
+
+## CROSS JOIN
+```js
+sql(`
+SELECT *
+FROM hobbies
+CROSS JOIN skills
+`)
+```
+
 # Currently Unsupported
 There are some MySQL features that are not yet supported. Please create an issue if you'd like to see a certain feature added.
 
-- OUTER JOINS
 - UNION
 - HAVING
-- DELETE/UPDATE using ORDER BY and LIMIT
-- ...

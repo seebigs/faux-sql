@@ -12,8 +12,6 @@ function cartesian(...arr) {
     });
 }
 
-// const cartesian = (...arr) => arr.reduce((a, b) => a.flatMap((d) => b.map((e) => [d, e].flat())));
-
 export default async function getJoinedRecords(from, filePath) {
     const loadedTables = {};
 
@@ -35,10 +33,6 @@ export default async function getJoinedRecords(from, filePath) {
     const joinedRecords = [];
     if (from.length > 1) {
         const cartesianRecords = cartesian(...tableData);
-
-        // console.log('cartesianRecords[0]', cartesianRecords[0]);
-
-        // FIXME: This is just INNER JOIN
         each(cartesianRecords, (record) => {
             const sourceData = {};
             each(record, (recordItem, recordIndex) => {
@@ -57,11 +51,6 @@ export default async function getJoinedRecords(from, filePath) {
                 const newRecord = {};
                 each(sourceData, (row, tableName) => {
                     newRecord[tableName] = row;
-                    // each(row, (val, key) => {
-                    //     if (typeof val !== 'undefined') {
-                    //         newRecord[`${tableName}.${key}`] = val;
-                    //     }
-                    // });
                 });
                 joinedRecords.push(newRecord);
             }
@@ -75,6 +64,28 @@ export default async function getJoinedRecords(from, filePath) {
             joinedRecords.push(newRecord);
         });
     }
+
+    each(from, ({ as: fromAlias, table: fromTable, join: joinType }) => {
+        if (joinType === 'LEFT JOIN') {
+            const tableKey = from[0].as || from[0].table;
+            each(loadedTables[tableKey].data, (row) => {
+                if (!joinedRecords.some((elem) => { return elem[tableKey] === row; })) {
+                    const newRecord = {};
+                    newRecord[tableKey] = row;
+                    joinedRecords.push(newRecord);
+                }
+            });
+        } else if (joinType === 'RIGHT JOIN') {
+            const tableKey = fromAlias || fromTable;
+            each(loadedTables[tableKey].data, (row) => {
+                if (!joinedRecords.some((elem) => { return elem[tableKey] === row; })) {
+                    const newRecord = {};
+                    newRecord[tableKey] = row;
+                    joinedRecords.push(newRecord);
+                }
+            });
+        }
+    });
 
     return {
         joinedRecords,

@@ -21,6 +21,10 @@
     {
       "user_id": 2,
       "hobby": "scuba"
+    },
+    {
+      "user_id": 666,
+      "hobby": "dancing"
     }
   ]
 }
