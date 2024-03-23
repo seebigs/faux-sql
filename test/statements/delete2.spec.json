@@ -1,7 +1,9 @@
 {
   "columns": {
     "id": {
-      "type": "INT"
+      "type": "INT",
+      "auto_increment": 4,
+      "primary_key": true
     },
     "name": {
       "type": "VARCHAR",
@@ -11,39 +13,28 @@
         "type": "value",
         "value": "Nimo"
       }
-    },
-    "last_login": {
-      "type": "DATE",
-      "default": {
-        "type": "function",
-        "name": "getdate",
-        "args": []
-      }
     }
   },
   "data": [
     {
       "id": 1,
-      "name": null,
-      "last_login": 2024
+      "name": "Bobby"
     },
     {
       "id": 2,
-      "name": "Bill",
-      "last_login": 2021
+      "name": "Bill"
     },
     {
       "id": 3,
-      "name": "Ted",
-      "last_login": 2023
+      "name": "Ted"
     },
     {
       "id": 4,
-      "last_login": 2022
+      "name": "Barbie"
     },
     {
       "id": 5,
-      "last_login": 2014
+      "name": "Benjamin"
     }
   ]
 }

@@ -11,7 +11,7 @@ import show from './src/statements/show.js';
 import truncate from './src/statements/truncate.js';
 import update from './src/statements/update.js';
 
-const executors = {
+const statementTypes = {
     alter,
     create,
     delete: del,
@@ -23,38 +23,52 @@ const executors = {
     update,
 };
 
+function executeStatement(parsed, resolvedFilePath, usingCLI) {
+    parsed.filePath = resolvedFilePath;
+
+    // console.log(JSON.stringify(parsed, null, 4));
+
+    if (parsed.type) {
+        const executor = statementTypes[parsed.type];
+        if (typeof executor === 'function') {
+            return executor(parsed, usingCLI);
+        }
+        throw new UnsupportedError(`"${parsed.type}" query type not yet supported`);
+    } else {
+        throw new Error('Please provide a statement to be evaluated');
+    }
+}
+
+
 export default function FauxSQL({ filePath } = {}, usingCLI = false) {
 
     async function fauxSQL(statement = '') {
-        let parsed = {};
+        let resolvedFilePath = `${process.cwd()}/database`;
+        if (filePath) {
+            resolvedFilePath = filePath.charAt(0) === '/' ? filePath : `${process.cwd()}/${filePath}`;
+        }
+
+        let parsedStatement = {};
         try {
-            parsed = new NodeSql.Parser().astify(statement) || {};
-            if (Array.isArray(parsed)) { [parsed] = parsed; }
+            parsedStatement = new NodeSql.Parser().astify(statement) || {};
         } catch (err) {
             console.log(statement);
             throw new Error(err.stack);
         }
 
-        parsed.filePath = `${process.cwd()}/database`;
-        if (filePath) {
-            parsed.filePath = filePath.charAt(0) === '/' ? filePath : `${process.cwd()}/${filePath}`;
-        }
-
-        // console.log(JSON.stringify(parsed, null, 4));
-
-        // https://learnsql.com/blog/sql-order-of-operations/
-        // https://medium.com/@shailav.shrestha/reference-types-of-sql-joins-4511cc802f02
-
-        if (parsed.type) {
-            const executor = executors[parsed.type];
-            if (typeof executor === 'function') {
-                return executor(parsed, usingCLI);
+        if (Array.isArray(parsedStatement)) {
+            const results = [];
+            for (const parsed of parsedStatement) {
+                results.push(await executeStatement(parsed, resolvedFilePath, usingCLI));
             }
-            throw new UnsupportedError(`"${parsed.type}" query type not yet supported`);
-        } else {
-            throw new Error('Please provide a statement to be evaluated');
+            return results;
         }
+
+        return executeStatement(parsedStatement, resolvedFilePath, usingCLI);
     }
 
     return fauxSQL;
 }
+
+// https://learnsql.com/blog/sql-order-of-operations/
+// https://medium.com/@shailav.shrestha/reference-types-of-sql-joins-4511cc802f02

@@ -1,22 +1,21 @@
 import each from 'seebigs-each';
-import { getTablePath, readTable } from '../database.js';
 import { parseValue } from '../values.js';
 import { distinctValues, eachReverse, getSortFn } from '../utils.js';
 import evalExpression from '../expressions.js';
 import whereFilter from '../where.js';
 import { SchemaError } from '../errors.js';
-import { defaultTableName } from '../defaults.js';
+import getJoinedRecords from '../join.js';
+import limitResults from '../limit.js';
 
 function resolveIdentifier(item, references, statementType) {
-    const itemType = item.type;
-    if (itemType === 'column_ref') {
-        return item.column;
+    if (item.type === 'column_ref') {
+        return item;
     }
-    if (itemType === 'number') {
+    if (item.type === 'number') {
         const identifier = references[item.value - 1];
         if (identifier) {
             if (identifier.expr.type === 'column_ref') {
-                return identifier.expr.column;
+                return identifier.expr;
             }
             throw new Error(`Can't ${statementType} by ${identifier.expr.type}`);
         } else {
@@ -35,10 +34,6 @@ export default async function select({
     orderby,
     where,
 }) {
-    const data = {};
-    const rawRecords = {};
-    let primaryTable = { columns: {}, data: {} };
-
     if (!from) {
         const quickResult = [];
         each(columns, (col) => {
@@ -50,107 +45,61 @@ export default async function select({
         return quickResult;
     }
 
-    /** FROM **/
-    for (let i = 0; i < from.length; i += 1) {
-        const {
-            tableAlias,
-            tableName,
-            tablePath,
-        } = getTablePath(filePath, from[i]);
+    const { joinedRecords } = await getJoinedRecords(from, filePath);
 
-        if (!tableName) { throw new Error('Please specify a table'); }
-        const table = await readTable(tablePath);
-        if (!table) { throw new SchemaError(`Table '${tableName}' not found at ${tablePath}`); }
-        if (i === 0) { primaryTable = table; }
-        data[tableName] = table;
-        if (tableAlias) { data[tableAlias] = table; } // possible collision with table names?
-    }
+    /** WHERE **/
 
-    /** JOIN **/
-
-    if (from.length > 1) {
-        const fromFirst = from[0];
-        const fromFirstKey = fromFirst.as || fromFirst.table;
-        for (let i = 1; i < from.length; i += 1) {
-            const fromNext = from[i];
-
-            if (!fromNext.join || fromNext.join === 'INNER JOIN') {
-                each(primaryTable.data, (row, index) => {
-                    each(data[fromNext.table].data, (nextRow) => {
-                        const fromNextKey = fromNext.as || fromNext.table;
-                        const compareObject = {};
-                        compareObject[fromFirstKey] = row;
-                        compareObject[fromNextKey] = nextRow;
-                        if (whereFilter(fromNext.on || where, compareObject)) {
-                            const rawResult = {};
-                            each(nextRow, (value, key) => {
-                                rawResult[key] = value;
-                            });
-                            each(row, (value, key) => {
-                                rawResult[key] = value;
-                            });
-                            rawRecords[index] = rawResult;
-                        }
-                    });
-                });
-            }
+    const filteredRecords = [];
+    each(joinedRecords, (row) => {
+        if (!where || whereFilter(where, row)) {
+            filteredRecords.push(row);
         }
-
-        // add WHERE filter for joins
-
-    } else {
-
-        /** WHERE **/
-
-        each(primaryTable.data, (row, index) => {
-            const compareObject = {};
-            compareObject[defaultTableName] = row;
-            if (!where || whereFilter(where, compareObject)) {
-                rawRecords[index] = row;
-            }
-        });
-    }
+    });
 
     /** GROUP BY **/
 
     let selectors = columns;
     if (selectors.length === 1 && selectors[0].expr.column === '*') {
-        const firstRecord = Object.values(rawRecords)[0];
+        const firstRecord = filteredRecords[0];
         if (!firstRecord) { return []; } // no records found
-        const allColumns = Object.keys(firstRecord);
-        selectors = allColumns.map((key) => {
-            return {
-                expr: {
-                    type: 'column_ref',
-                    column: key,
-                },
-            };
+        const allColumns = [];
+        each(firstRecord, (tableRow, tableKey) => {
+            each(tableRow, (_, rowKey) => {
+                allColumns.push({
+                    expr: {
+                        type: 'column_ref',
+                        table: tableKey,
+                        column: rowKey,
+                    },
+                });
+            });
         });
+        selectors = allColumns;
     }
 
-    let groupedResults = rawRecords;
+    let groupedResults = filteredRecords;
     let groups = selectors;
     if (groupby) {
         groups = [];
         each(groupby, (groupByItem) => {
             groups.push(resolveIdentifier(groupByItem, selectors, 'group'));
         });
-        const records = {};
+        const groupedRecords = {};
         const buckets = {};
-        each(rawRecords, (result) => {
-            const bucketKey = groups.reduce((prev, curr) => {
-                return prev + result[curr];
+        each(filteredRecords, (result) => {
+            const bucketKey = groups.reduce((accum, curr) => {
+                return accum + parseValue(curr, result);
             }, '');
             buckets[bucketKey] = buckets[bucketKey] || [];
             buckets[bucketKey].push(result);
         });
 
-        each(buckets, (bucketValues, bucketKey) => {
-            const bucket = distinct ? distinctValues(bucketValues) : bucketValues;
-            records[bucketKey] = bucket;
+        each(buckets, (bucketRows, bucketKey) => {
+            const bucket = distinct ? distinctValues(bucketRows) : bucketRows;
+            groupedRecords[bucketKey] = bucket;
         });
 
-        groupedResults = records;
+        groupedResults = groupedRecords;
     }
 
     /** HAVING **/
@@ -163,7 +112,7 @@ export default async function select({
         each(selectors, (sel) => {
             const conditions = !groupby ? {} : {
                 column_ref: () => {
-                    return groups.indexOf(sel.expr.column) >= 0;
+                    return groups.some((e) => e.table === sel.expr.table && e.column === sel.expr.column);
                 },
             };
             let expr;
@@ -172,7 +121,7 @@ export default async function select({
             } else {
                 expr = evalExpression(sel.expr, fullResult, groupedResults, sel.as, conditions);
             }
-            if (expr) {
+            if (expr && typeof expr.value !== 'undefined') {
                 result[expr.key] = expr.value;
             }
         });
@@ -183,15 +132,9 @@ export default async function select({
 
     if (orderby) {
         eachReverse(orderby, (orderByItem) => {
-            const columnName = resolveIdentifier(orderByItem.expr, selectors, 'order');
-            const sortFn = getSortFn(columnName, orderByItem.type);
-            if (groupby) {
-                selectedResults.sort((a, b) => {
-                    return sortFn(a[0], b[0]);
-                });
-            } else {
-                selectedResults.sort(sortFn);
-            }
+            const identifier = resolveIdentifier(orderByItem.expr, selectors, 'order');
+            const sortFn = getSortFn(identifier.column, orderByItem.type);
+            selectedResults.sort(sortFn);
         });
     }
 
@@ -203,15 +146,7 @@ export default async function select({
 
     /** LIMIT **/
 
-    const limitVal = limit && limit.value;
-    if (limit && limit.value) {
-        if (limitVal.length > 1) {
-            const limitLength = parseInt(parseValue(limitVal[0]), 10) + parseInt(parseValue(limitVal[1]), 10);
-            selectedResults = selectedResults.slice(parseValue(limitVal[0]), limitLength);
-        } else {
-            selectedResults = selectedResults.slice(0, parseValue(limitVal[0]));
-        }
-    }
+    selectedResults = limitResults(selectedResults, limit);
 
     return selectedResults;
 }

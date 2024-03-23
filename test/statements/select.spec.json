@@ -2,7 +2,7 @@
   "columns": {
     "id": {
       "type": "INT",
-      "auto_increment": true,
+      "auto_increment": 6,
       "primary_key": true
     },
     "name": {
@@ -29,8 +29,8 @@
       "type": "INT"
     }
   },
-  "data": {
-    "0": {
+  "data": [
+    {
       "id": 1,
       "name": "Aaron A Aaronson",
       "type": "admin",
@@ -38,7 +38,7 @@
       "height": "_med_tall",
       "age": 55
     },
-    "1": {
+    {
       "id": 2,
       "name": "John Doe",
       "type": "admin",
@@ -46,7 +46,7 @@
       "height": "med-tall",
       "age": 15
     },
-    "2": {
+    {
       "id": 3,
       "name": "Sally Ride",
       "type": "member",
@@ -54,7 +54,7 @@
       "height": "short",
       "age": 33
     },
-    "3": {
+    {
       "id": 4,
       "name": "Willy Wonka",
       "type": "member",
@@ -62,7 +62,7 @@
       "height": "med_tall",
       "age": 22
     },
-    "4": {
+    {
       "id": 5,
       "name": "Noah Dupe",
       "type": "admin",
@@ -70,7 +70,7 @@
       "height": "short",
       "age": 15
     },
-    "5": {
+    {
       "id": 5,
       "name": "Noah Dupe",
       "type": "admin",
@@ -78,5 +78,5 @@
       "height": "short",
       "age": 15
     }
-  }
+  ]
 }

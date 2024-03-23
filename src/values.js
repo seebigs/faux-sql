@@ -1,5 +1,8 @@
 
 export function coerceValue(value, type) {
+    if (!value) {
+        return value; // don't coerce 0, null, false, '', or undefined
+    }
     if (type === 'INTEGER'
         || type === 'INT'
         || type === 'BIGINT'
@@ -34,11 +37,12 @@ export function coerceValue(value, type) {
     return value; // store JSON etc
 }
 
-export function parseValue(input, source) {
+export function parseValue(input, sourceData) {
     if (input) {
         const {
             type,
             value,
+            table,
             column,
             operator,
         } = input;
@@ -46,23 +50,24 @@ export function parseValue(input, source) {
             return Number(value);
         }
         if (type === 'column_ref') {
-            return source[column];
+            const tableName = table || Object.keys(sourceData)[0];
+            return sourceData[tableName] && sourceData[tableName][column];
         }
         if (type === 'null') {
             return null;
         }
         if (type === 'binary_expr') {
             if (operator === '*') {
-                return parseValue(input.left, source) * parseValue(input.right, source);
+                return parseValue(input.left, sourceData) * parseValue(input.right, sourceData);
             }
             if (operator === '/') {
-                return parseValue(input.left, source) / parseValue(input.right, source);
+                return parseValue(input.left, sourceData) / parseValue(input.right, sourceData);
             }
             if (operator === '+') {
-                return parseValue(input.left, source) + parseValue(input.right, source);
+                return parseValue(input.left, sourceData) + parseValue(input.right, sourceData);
             }
             if (operator === '-') {
-                return parseValue(input.left, source) - parseValue(input.right, source);
+                return parseValue(input.left, sourceData) - parseValue(input.right, sourceData);
             }
         }
         return value;

@@ -3,7 +3,17 @@
   "version": "0.2.0",
   "type": "module",
   "description": "A local JSON database using standard MySQL queries. The fastest way to get a database into your project.",
-  "keywords": ["database", "json", "local", "mysql", "development", "readable", "simple", "lightweight", "javascript"],
+  "keywords": [
+    "database",
+    "json",
+    "local",
+    "mysql",
+    "development",
+    "readable",
+    "simple",
+    "lightweight",
+    "javascript"
+  ],
   "main": "index.js",
   "bin": "./cli.js",
   "scripts": {

@@ -17,7 +17,7 @@ export function addColumn(table, def) {
         column.not_null = true;
     }
     if (def.auto_increment) {
-        column.auto_increment = true;
+        column.auto_increment = 1;
     }
 
     if (def.primary_key === 'primary key') {

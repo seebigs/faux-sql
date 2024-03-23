@@ -1,6 +1,6 @@
 import each from 'seebigs-each';
-import { getTablePath, readTable, writeTable } from '../database.js';
-import { SchemaError, UnsupportedError } from '../errors.js';
+import { loadTable, writeTable } from '../database.js';
+import { UnsupportedError } from '../errors.js';
 import {
     addColumn,
     addConstraint,
@@ -8,15 +8,18 @@ import {
     dropKey,
 } from '../column.js';
 
-export default async function alter(parsed) {
-    for (const tableObj of parsed.table) {
-        const { tableName, tablePath } = getTablePath(parsed.filePath, tableObj);
+export default async function alter({ table: parsedTable, expr: parsedExpr, filePath }) {
+    for (const tableObj of parsedTable) {
+        const table = await loadTable(filePath, tableObj);
 
-        const table = await readTable(tablePath);
-        if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
+        each(parsedExpr, (expr) => {
+            const {
+                action,
+                resource,
+                keyword,
+                symbol,
+            } = expr;
 
-        each(parsed.expr, (expr) => {
-            const { action, resource } = expr;
             if (action === 'add') {
                 if (resource === 'column') {
                     addColumn(table, expr);
@@ -29,11 +32,17 @@ export default async function alter(parsed) {
                 } else if (resource === 'key') {
                     dropKey(table, expr.keyword);
                 }
+            } else if (keyword === 'auto_increment' && symbol === '=') {
+                each(table.columns, (column) => {
+                    if (column.auto_increment && expr.auto_increment) {
+                        column.auto_increment = expr.auto_increment;
+                    }
+                });
             } else {
-                throw new UnsupportedError(`Alter ${action} not yet supported`);
+                throw new UnsupportedError(`Alter ${action || keyword} not yet supported`);
             }
         });
 
-        await writeTable(tablePath, table);
+        await writeTable(table.tablePath, table);
     }
 }

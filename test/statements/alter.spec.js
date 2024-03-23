@@ -27,6 +27,7 @@ describe(testName, () => {
             columns: {
                 id: {
                     type: 'INT',
+                    auto_increment: 1,
                 },
                 name: {
                     type: 'VARCHAR',
@@ -38,12 +39,16 @@ describe(testName, () => {
                     primary_key: true,
                 },
             },
-            data: {
-                0: {
+            data: [
+                {
                     id: 1,
                     name: 'Person',
                 },
-            },
+                {
+                    id: 2,
+                    name: 'Evil Twin',
+                },
+            ],
         });
     });
 
@@ -52,15 +57,15 @@ describe(testName, () => {
         await fauxSQL(
             `
             ALTER TABLE ${testName}
-            DROP id
+            DROP name
             `,
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table).toEqual({
             columns: {
-                name: {
-                    type: 'VARCHAR',
-                    length: 100,
+                id: {
+                    type: 'INT',
+                    auto_increment: 1,
                 },
                 email: {
                     type: 'VARCHAR',
@@ -68,11 +73,46 @@ describe(testName, () => {
                     primary_key: true,
                 },
             },
-            data: {
-                0: {
-                    name: 'Person',
+            data: [
+                {
+                    id: 1,
+                },
+                {
+                    id: 2,
+                },
+            ],
+        });
+    });
+
+    it('updates auto increment', async () => {
+        expect.assertions(1);
+        await fauxSQL(
+            `
+            ALTER TABLE ${testName}
+            AUTO_INCREMENT = 999;
+            `,
+        );
+        const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
+        expect(table).toEqual({
+            columns: {
+                id: {
+                    type: 'INT',
+                    auto_increment: 999,
+                },
+                email: {
+                    type: 'VARCHAR',
+                    length: 255,
+                    primary_key: true,
                 },
             },
+            data: [
+                {
+                    id: 1,
+                },
+                {
+                    id: 2,
+                },
+            ],
         });
     });
 

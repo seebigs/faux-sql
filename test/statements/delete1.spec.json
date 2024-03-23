@@ -2,17 +2,8 @@
   "columns": {
     "id": {
       "type": "INT",
-      "auto_increment": true,
+      "auto_increment": 4,
       "primary_key": true
-    },
-    "name": {
-      "type": "VARCHAR",
-      "unique": true,
-      "length": 100,
-      "default": {
-        "type": "value",
-        "value": "Nimo"
-      }
     },
     "last_login": {
       "type": "DATE",
@@ -23,21 +14,26 @@
       }
     }
   },
-  "data": {
-    "0": {
+  "data": [
+    {
       "id": 1,
-      "name": "August",
       "last_login": "today"
     },
-    "1": {
+    {
       "id": 2,
-      "name": "Bill",
       "last_login": "yesterday"
     },
-    "2": {
+    {
       "id": 3,
-      "name": "Ted",
+      "last_login": "never"
+    },
+    {
+      "id": 4,
+      "last_login": "today"
+    },
+    {
+      "id": 5,
       "last_login": "yesterday"
     }
-  }
+  ]
 }

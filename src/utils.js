@@ -50,3 +50,25 @@ export function getSortFn(key, sortOpt) {
 
     return sort === 'desc' ? sortDesc : sortAsc;
 }
+
+export function getSortFnNested({ table, column }, sortOpt) {
+    const sort = sortOpt && sortOpt.toLowerCase();
+
+    function sortAsc(a, b) {
+        const tA = a[table] || Object.keys(a)[0];
+        const tB = b[table] || Object.keys(b)[0];
+        if (tA[column] < tB[column]) { return -1; }
+        if (tA[column] > tB[column]) { return 1; }
+        return 0;
+    }
+
+    function sortDesc(a, b) {
+        const tA = a[table] || a[Object.keys(a)[0]];
+        const tB = b[table] || b[Object.keys(b)[0]];
+        if (tA[column] > tB[column]) { return -1; }
+        if (tA[column] < tB[column]) { return 1; }
+        return 0;
+    }
+
+    return sort === 'desc' ? sortDesc : sortAsc;
+}

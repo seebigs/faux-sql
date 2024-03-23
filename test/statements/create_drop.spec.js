@@ -27,16 +27,18 @@ describe(testName, () => {
         }
         await fauxSQL(
             `
-            CREATE TABLE ${testName}
-            (id int primary key AUTO_INCREMENT, name varchar(100) not null unique default 'Nimo', last_login date DEFAULT GETDATE())
-            `,
+            CREATE TABLE ${testName} (
+            id int primary key AUTO_INCREMENT,
+            name varchar(100) not null unique default 'Nimo',
+            last_login date DEFAULT GETDATE()
+            )`,
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table).toEqual({
             columns: {
                 id: {
                     type: 'INT',
-                    auto_increment: true,
+                    auto_increment: 1,
                     primary_key: true,
                 },
                 name: {
@@ -71,9 +73,11 @@ describe(testName, () => {
         }
         await fauxSQL(
             `
-            CREATE TABLE ${testName}
-            (id int, name varchar(100), age int, PRIMARY KEY (id, name))
-            `,
+            CREATE TABLE ${testName} (
+            id int, name varchar(100),
+            age int,
+            PRIMARY KEY (id, name)
+            )`,
         );
         const table = JSON.parse(readFileSync(testTablePath, { encoding: 'utf-8' }));
         expect(table).toEqual({

@@ -30,38 +30,42 @@ const aggrFunctions = {
         return Object.keys(records).length;
     },
     avg: (colExpr, records) => {
-        const key = colExpr.args.expr.column;
+        const tableName = colExpr.args.expr.table || Object.keys(records[0])[0];
+        const columnName = colExpr.args.expr.column;
         let count = 0;
         let sum = 0;
         each(records, (record) => {
             count += 1;
-            sum += Number(record[key]);
+            sum += Number(record[tableName][columnName]);
         });
         return sum / count;
     },
     max: (colExpr, records) => {
-        const key = colExpr.args.expr.column;
+        const tableName = colExpr.args.expr.table || Object.keys(records[0])[0];
+        const columnName = colExpr.args.expr.column;
         let max;
         each(records, (record) => {
-            const currVal = record[key];
+            const currVal = record[tableName][columnName];
             max = max > currVal ? max : currVal;
         });
         return max;
     },
     min: (colExpr, records) => {
-        const key = colExpr.args.expr.column;
+        const tableName = colExpr.args.expr.table || Object.keys(records[0])[0];
+        const columnName = colExpr.args.expr.column;
         let min;
         each(records, (record) => {
-            const currVal = record[key];
+            const currVal = record[tableName][columnName];
             min = min < currVal ? min : currVal;
         });
         return min;
     },
     sum: (colExpr, records) => {
-        const key = colExpr.args.expr.column;
+        const tableName = colExpr.args.expr.table || Object.keys(records[0])[0];
+        const columnName = colExpr.args.expr.column;
         let sum = 0;
         each(records, (record) => {
-            sum += record[key];
+            sum += record[tableName][columnName];
         });
         return sum;
     },
@@ -108,21 +112,18 @@ export default function evalExpression(expression, row, data, asKey, conditions 
     let value;
 
     if (expression) {
-        if (expression.type === 'column_ref') {
-            if (typeof conditions.column_ref === 'function') {
-                if (!conditions.column_ref(expression)) {
-                    return false;
-                }
-            }
-            key = asKey || expression.column;
-            value = row[expression.column];
-        } else if (expression.type === 'function') {
+        if (expression.type === 'function') {
             key = asKey || fnToString(expression);
             value = fnExec(expression, row);
         } else if (expression.type === 'aggr_func') {
             key = asKey || aggrFnToString(expression);
             value = aggrFnExec(expression, data);
         } else {
+            if (expression.type === 'column_ref' && typeof conditions.column_ref === 'function') {
+                if (!conditions.column_ref(expression)) {
+                    return false;
+                }
+            }
             key = asKey || expression.column;
             value = parseValue(expression, row);
         }

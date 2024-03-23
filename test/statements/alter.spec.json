@@ -1,17 +1,22 @@
 {
   "columns": {
     "id": {
-      "type": "INT"
+      "type": "INT",
+      "auto_increment": 1
     },
     "name": {
       "type": "VARCHAR",
       "length": 100
     }
   },
-  "data": {
-    "0": {
+  "data": [
+    {
       "id": 1,
       "name": "Person"
+    },
+    {
+      "id": 2,
+      "name": "Evil Twin"
     }
-  }
+  ]
 }

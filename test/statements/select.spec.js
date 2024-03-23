@@ -183,17 +183,31 @@ describe(testName, () => {
     });
 
     it('handles group by', async () => {
-        expect.assertions(1);
-        const results = await fauxSQL(
+        expect.assertions(2);
+        let results = await fauxSQL(
+            `
+            SELECT DISTINCT count(*) as total, t2.hat, type
+            FROM ${testName} t2
+            GROUP BY 2, 3
+            `,
+        );
+        expect(results).toEqual([
+            { total: 1, hat: 'red', type: 'admin' },
+            { total: 2, hat: 'blue', type: 'admin' },
+            { total: 1, hat: 'red', type: 'member' },
+            { total: 1, hat: 'blue', type: 'member' },
+        ]);
+        results = await fauxSQL(
             `
             SELECT DISTINCT count(*) as total, hat
             FROM ${testName}
             GROUP BY 2
+            ORDER BY hat
             `,
         );
         expect(results).toEqual([
-            { total: 2, hat: 'red' },
             { total: 3, hat: 'blue' },
+            { total: 2, hat: 'red' },
         ]);
     });
 

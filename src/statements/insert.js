@@ -10,8 +10,7 @@ export default async function insert(parsed) {
 
         const table = await readTable(tablePath);
         if (!table) { throw new SchemaError(`Table ${tableName} not found at ${tablePath}`); }
-        table.data = table.data || {};
-        let nextTableIndex = Object.keys(table.data).length;
+        table.data = table.data || [];
 
         each(parsed.columns, (parsedColumn) => {
             if (!table.columns[parsedColumn]) {
@@ -31,17 +30,16 @@ export default async function insert(parsed) {
                 let val;
                 const expr = evalExpression(value[columnIndex]);
                 if (expr) {
-                    val = expr.value;
+                    val = coerceValue(expr.value, tableColumn.type);
                 }
-                if (typeof val === 'undefined') {
-                    const columnDefault = tableColumn.default;
-                    if (tableColumn.auto_increment) {
-                        val = nextTableIndex + 1;
-                    } else if (columnDefault) {
-                        const defaultExpr = evalExpression(columnDefault, record, table.data);
-                        if (defaultExpr) {
-                            val = defaultExpr.value;
-                        }
+                if (tableColumn.auto_increment) {
+                    if (!val) { val = tableColumn.auto_increment; }
+                    tableColumn.auto_increment = Math.max(tableColumn.auto_increment, val) + 1;
+                }
+                if (tableColumn.default && typeof val === 'undefined') {
+                    const defaultExpr = evalExpression(tableColumn.default, record, table.data);
+                    if (defaultExpr) {
+                        val = defaultExpr.value;
                     }
                 }
                 const mustNotBeNull = tableColumn.not_null || tableColumn.primary_key;
@@ -49,15 +47,16 @@ export default async function insert(parsed) {
                     throw new ConstraintError(`${tableName} ${columnName} cannot be NULL`);
                 }
                 if (typeof val !== 'undefined') {
-                    record[columnName] = coerceValue(val, tableColumn.type);
+                    record[columnName] = val;
                 }
                 tableColumnIndex += 1;
             });
 
             // Check for duplicate records
             let duplicateFound = false;
+            const ignoreDuplicates = parsed.prefix.indexOf('ignore') !== -1;
             const onDupeUpdate = parsed.on_duplicate_update;
-            each(table.data, (existingRow, existingIndex) => {
+            each(table.data, (existingRow) => {
                 // is this existingRow a dupe of new record?
                 let isDupe = false;
                 if (uniqueColumns.length) {
@@ -77,19 +76,18 @@ export default async function insert(parsed) {
                         each(onDupeUpdate.set, (set) => {
                             const expr = evalExpression(set.value, existingRow, table.data);
                             if (expr) {
-                                table.data[existingIndex][set.column] = expr.value;
+                                existingRow[set.column] = expr.value;
                             }
                         });
-                    } else {
-                        throw new DuplicateError(`Duplicate record in \`${tableName}\` for ${JSON.stringify(record)}`);
+                    } else if (!ignoreDuplicates) {
+                        throw new DuplicateError(`Duplicate record in '${tableName}' for ${JSON.stringify(record)}`);
                     }
                 }
             });
 
             // If not a duplicate, insert at bottom
             if (!duplicateFound) {
-                table.data[nextTableIndex] = record;
-                nextTableIndex += 1;
+                table.data.push(record);
             }
         });
 

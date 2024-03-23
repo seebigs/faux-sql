@@ -1,0 +1,26 @@
+{
+  "columns": {
+    "user_id": {
+      "type": "INT",
+      "primary_key": true
+    },
+    "hobby": {
+      "type": "VARCHAR",
+      "length": 100
+    }
+  },
+  "data": [
+    {
+      "user_id": 3,
+      "hobby": "reading"
+    },
+    {
+      "user_id": 4,
+      "hobby": "hiking"
+    },
+    {
+      "user_id": 2,
+      "hobby": "scuba"
+    }
+  ]
+}

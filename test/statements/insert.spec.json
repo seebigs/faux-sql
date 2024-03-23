@@ -2,7 +2,7 @@
   "columns": {
     "id": {
       "type": "INT",
-      "auto_increment": true,
+      "auto_increment": 1,
       "primary_key": true
     },
     "name": {

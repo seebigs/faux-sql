@@ -7,6 +7,7 @@ import {
     stat,
     writeFile,
 } from 'fs/promises';
+import { SchemaError } from './errors.js';
 
 export function getTablePath(filePath, tableObj) {
     const tableAlias = tableObj.as;
@@ -31,6 +32,7 @@ export async function readTable(tablePath) {
 }
 
 export async function writeTable(tablePath, table) {
+    delete table.tablePath;
     return writeFile(tablePath, JSON.stringify(table, null, 2));
 }
 
@@ -72,4 +74,13 @@ export async function listFiles(filesPath) {
         }
     }
     return databases;
+}
+
+export async function loadTable(filePath, parsedFrom) {
+    const { tableName, tablePath } = getTablePath(filePath, parsedFrom);
+    if (!tableName) { throw new Error('Please specify a table'); }
+    const table = await readTable(tablePath);
+    if (!table) { throw new SchemaError(`Table '${tableName}' not found at ${tablePath}`); }
+    table.tablePath = tablePath;
+    return table;
 }

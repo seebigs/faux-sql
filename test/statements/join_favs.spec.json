@@ -13,23 +13,26 @@
       "length": 100
     }
   },
-  "data": {
-    "0": {
+  "data": [
+    {
       "user_id": 1,
       "fav_animal": "Aardvark",
       "fav_food": "Apples"
     },
-    "1": {
+    {
       "user_id": 2,
       "fav_animal": "Deer",
       "fav_food": "Celery"
     },
-    "2": {
-      "user_id": 3
+    {
+      "user_id": 3,
+      "fav_animal": null,
+      "fav_food": null
     },
-    "3": {
+    {
       "user_id": 4,
+      "fav_animal": null,
       "fav_food": "Candy"
     }
-  }
+  ]
 }
