@@ -1,6 +1,6 @@
 {
   "name": "faux-sql",
-  "version": "0.3.0",
+  "version": "0.3.1",
   "type": "module",
   "description": "A local JSON database using standard MySQL queries. The fastest way to get a database into your project.",
   "keywords": [
