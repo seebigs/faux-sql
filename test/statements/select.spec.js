@@ -51,7 +51,7 @@ describe(testName, () => {
                 type: 'admin',
                 hat: 'red',
                 height: '_med_tall',
-                age: 55,
+                age: -55.66,
             },
             {
                 id: 2,
@@ -201,7 +201,7 @@ describe(testName, () => {
             `
             SELECT DISTINCT count(*) as total, hat
             FROM ${testName}
-            GROUP BY 2
+            GROUP BY hat
             ORDER BY hat
             `,
         );
@@ -235,11 +235,11 @@ describe(testName, () => {
             `,
         );
         expect(results).toEqual([
+            { name: 'Aaron A Aaronson', age: -55.66 },
             { name: 'John Doe', age: 15 },
             { name: 'Noah Dupe', age: 15 },
             { name: 'Willy Wonka', age: 22 },
             { name: 'Sally Ride', age: 33 },
-            { name: 'Aaron A Aaronson', age: 55 },
         ]);
     });
 
@@ -247,14 +247,24 @@ describe(testName, () => {
         expect.assertions(1);
         const results = await fauxSQL(
             `
-            SELECT concat(id, '-', type)
+            SELECT abs(age + 1), ceil(age), floor(age), round(age), truncate(age, -1),
+                concat(id, '-', type),
+                if(hat = 'red', type, false) as ifhat,
+                ifnull(hat, 'other') as ifnull
             FROM ${testName}
             LIMIT 1
             `,
         );
         expect(results).toEqual([
             {
+                'abs(age+1)': 54.66,
+                'ceil(age)': -55,
+                'floor(age)': -56,
+                'round(age)': -56,
+                'truncate(age,-1)': -50,
                 'concat(id,\'-\',type)': '1-admin',
+                ifhat: 'admin',
+                ifnull: 'red',
             },
         ]);
     });
@@ -263,14 +273,15 @@ describe(testName, () => {
         expect.assertions(1);
         const results = await fauxSQL(
             `
-            SELECT avg(id), sum(id), max(name), min(id)
+            SELECT count(*), count(DISTINCT id), avg(id * (1+2)), sum(id), max(name), min(id)
             FROM ${testName}
-            LIMIT 1
             `,
         );
         expect(results).toEqual([
             {
-                'AVG(id)': 3.3333333333333335,
+                'COUNT(*)': 6,
+                'COUNT(DISTINCT id)': 5,
+                'AVG(id*(1+2))': 10,
                 'SUM(id)': 20,
                 'MAX(name)': 'Willy Wonka',
                 'MIN(id)': 1,

@@ -146,6 +146,12 @@ export default async function select({
 
     /** LIMIT **/
 
+    const implicitGroupAll = !groupby && selectors.every((sel) => {
+        return sel.expr.type === 'aggr_func';
+    });
+    if (implicitGroupAll) {
+        limit = { value: [{ type: 'number', value: 1 }] };
+    }
     selectedResults = limitResults(selectedResults, limit);
 
     return selectedResults;

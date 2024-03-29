@@ -18,16 +18,20 @@ export default async function getJoinedRecords(from, filePath) {
     const tableData = [];
     for (const parsedFrom of from) {
         const table = await loadTable(filePath, parsedFrom);
-
-        each(table.data, (record, index) => {
-            Object.defineProperty(record, 'fauxsqlTableIndex', {
-                value: index,
-                enumerable: false,
-            });
-        });
-
         loadedTables[parsedFrom.as || parsedFrom.table] = table;
-        tableData.push(table.data);
+        if (table.data) {
+            each(table.data, (record, index) => {
+                Object.defineProperty(record, 'fauxsqlTableIndex', {
+                    value: index,
+                    enumerable: false,
+                });
+            });
+            if (Array.isArray(table.data)) {
+                tableData.push(table.data);
+            } else {
+                throw new Error('Table data must be in the format of an Array');
+            }
+        }
     }
 
     const joinedRecords = [];

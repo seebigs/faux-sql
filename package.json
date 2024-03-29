@@ -15,7 +15,9 @@
     "javascript"
   ],
   "main": "index.js",
-  "bin": "./cli.js",
+  "bin": {
+    "faux-sql": "cli.js"
+  },
   "scripts": {
     "lint": "eslint .",
     "test-jest": "node --experimental-vm-modules --no-warnings node_modules/jest/bin/jest.js",
