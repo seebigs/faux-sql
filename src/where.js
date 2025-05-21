@@ -56,7 +56,7 @@ const filters = {
             if (compareRight.charAt(compareRight.length - 1) !== '%') {
                 compareRight = `${compareRight}$`;
             }
-            const regex = new RegExp(compareRight.replaceAll('%', '.*').replaceAll(/(?<!\\)_/g, '.'));
+            const regex = new RegExp(compareRight.replaceAll('%', '.*').replaceAll(/(?<!\\)_/g, '.'), 'i');
             const match = left.match(regex);
             return not ? !match : match;
         }

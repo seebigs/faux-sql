@@ -117,7 +117,7 @@ describe(testName, () => {
     });
 
     it('handles where like', async () => {
-        expect.assertions(3);
+        expect.assertions(4);
         let results = await fauxSQL(
             `
             SELECT id
@@ -151,6 +151,16 @@ describe(testName, () => {
         );
         expect(results).toEqual([
             { id: 4 },
+        ]);
+        results = await fauxSQL( // MySQL LIKE is case insensitive by default for non-binary strings
+            `
+            SELECT id
+            FROM ${testName}
+            WHERE name like "sal%"
+            `,
+        );
+        expect(results).toEqual([
+            { id: 3 },
         ]);
     });
 
