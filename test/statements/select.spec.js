@@ -35,6 +35,36 @@ describe(testName, () => {
         ]);
     });
 
+    it('selects * even when some properties are missing', async () => {
+        expect.assertions(1);
+        const results = await fauxSQL(
+            `
+            SELECT *
+            FROM ${testName}
+            WHERE id = 3 OR id = 4
+            `,
+        );
+        expect(results).toEqual([
+            {
+                age: 33,
+                hat: 'red',
+                height: 'short',
+                id: 3,
+                name: 'Sally Ride',
+                type: 'member',
+            },
+            {
+                age: 22,
+                chocolate_factory: true,
+                hat: 'blue',
+                height: 'med_tall',
+                id: 4,
+                name: 'Willy Wonka',
+                type: 'member',
+            },
+        ]);
+    });
+
     it('limits results when specified', async () => {
         expect.assertions(1);
         const results = await fauxSQL(

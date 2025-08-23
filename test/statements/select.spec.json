@@ -27,6 +27,9 @@
     },
     "age": {
       "type": "INT"
+    },
+    "chocolate_factory": {
+      "type": "BOOLEAN"
     }
   },
   "data": [
@@ -60,7 +63,8 @@
       "type": "member",
       "hat": "blue",
       "height": "med_tall",
-      "age": 22
+      "age": 22,
+      "chocolate_factory": true
     },
     {
       "id": 5,

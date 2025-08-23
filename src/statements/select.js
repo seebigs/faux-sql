@@ -45,7 +45,7 @@ export default async function select({
         return quickResult;
     }
 
-    const { joinedRecords } = await getJoinedRecords(from, filePath);
+    const { joinedRecords, loadedTables } = await getJoinedRecords(from, filePath);
 
     /** WHERE **/
 
@@ -60,18 +60,22 @@ export default async function select({
 
     let selectors = columns;
     if (selectors.length === 1 && selectors[0].expr.column === '*') {
-        const firstRecord = filteredRecords[0];
-        if (!firstRecord) { return []; } // no records found
+        const combinedColumns = {};
+        each(loadedTables, (table, tableKey) => {
+            each(table.columns, (_, columnKey) => {
+                if (!combinedColumns[columnKey]) {
+                    combinedColumns[columnKey] = tableKey;
+                }
+            });
+        });
         const allColumns = [];
-        each(firstRecord, (tableRow, tableKey) => {
-            each(tableRow, (_, rowKey) => {
-                allColumns.push({
-                    expr: {
-                        type: 'column_ref',
-                        table: tableKey,
-                        column: rowKey,
-                    },
-                });
+        each(combinedColumns, (tableKey, columnKey) => {
+            allColumns.push({
+                expr: {
+                    type: 'column_ref',
+                    table: tableKey,
+                    column: columnKey,
+                },
             });
         });
         selectors = allColumns;
