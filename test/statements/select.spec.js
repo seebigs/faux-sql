@@ -94,6 +94,34 @@ describe(testName, () => {
         ]);
     });
 
+    it('handles pagination', async () => {
+        expect.assertions(2);
+        const resultsOffset = await fauxSQL(
+            `
+            SELECT name
+            FROM ${testName}
+            LIMIT 2
+            OFFSET 1
+            `,
+        );
+        const resultsShorthand = await fauxSQL(
+            `
+            SELECT name
+            FROM ${testName}
+            LIMIT 2, 3
+            `,
+        );
+        expect(resultsOffset).toEqual([
+            { name: 'John Doe' },
+            { name: 'Sally Ride' },
+        ]);
+        expect(resultsShorthand).toEqual([
+            { name: 'Sally Ride' },
+            { name: 'Willy Wonka' },
+            { name: 'Noah Dupe' },
+        ]);
+    });
+
     it('handles distinct results', async () => {
         expect.assertions(2);
         const distinctSelect = await fauxSQL(
