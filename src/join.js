@@ -56,8 +56,8 @@ export default async function getJoinedRecords(from, filePath) {
                         const joinWhere = {
                             type: 'binary_expr',
                             operator: '=',
-                            left: { type: 'column_ref', table: firstTableKey, column: using },
-                            right: { type: 'column_ref', table: currTableKey, column: using },
+                            left: { type: 'column_ref', table: firstTableKey, column: using.value },
+                            right: { type: 'column_ref', table: currTableKey, column: using.value },
                         };
                         if (!whereFilter(joinWhere, sourceData)) {
                             matchesAllFilters = false;

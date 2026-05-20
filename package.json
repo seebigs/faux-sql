@@ -41,13 +41,13 @@
   "dependencies": {
     "minimist": "^1.2.8",
     "mkdirp": "^3.0.1",
-    "node-sql-parser": "^4.5.1",
+    "node-sql-parser": "^5.4.0",
     "seebigs-each": "^1.1.0"
   },
   "devDependencies": {
     "eslint": "^8.24.0",
     "eslint-config-airbnb-base": "^15.0.0",
     "eslint-plugin-import": "^2.26.0",
-    "jest": "^29.7.0"
+    "jest": "^30.4.2"
   }
 }

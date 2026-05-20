@@ -85,7 +85,7 @@ export default async function select({
     let groups = selectors;
     if (groupby) {
         groups = [];
-        each(groupby, (groupByItem) => {
+        each(groupby.columns, (groupByItem) => {
             groups.push(resolveIdentifier(groupByItem, selectors, 'group'));
         });
         const groupedRecords = {};

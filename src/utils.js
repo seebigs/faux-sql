@@ -72,3 +72,12 @@ export function getSortFnNested({ table, column }, sortOpt) {
 
     return sort === 'desc' ? sortDesc : sortAsc;
 }
+
+export function getExprName(expr) {
+    if (typeof expr.name === 'string') {
+        return expr.name.toLowerCase();
+    }
+    const nameArr = (expr.name && expr.name.name) || [];
+    const fnName = nameArr.length > 0 ? nameArr[0].value : '';
+    return fnName.toLowerCase();
+}

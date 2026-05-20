@@ -1,7 +1,7 @@
 import each from 'seebigs-each';
 import { parseValue } from './values.js';
 import { UnsupportedError } from './errors.js';
-import { distinctValues } from './utils.js';
+import { distinctValues, getExprName } from './utils.js';
 import whereFilter from './where.js';
 
 function getNow() {
@@ -118,19 +118,21 @@ const aggrFunctions = {
 };
 
 function fnExec(colExpr, row) {
-    const fn = functions[colExpr.name.toLowerCase()];
+    const fnName = getExprName(colExpr);
+    const fn = functions[fnName];
     if (typeof fn === 'function') {
         return fn(colExpr, row);
     }
-    throw new UnsupportedError(`${colExpr.name} function not yet supported`);
+    throw new UnsupportedError(`${fnName} function not yet supported`);
 }
 
 function aggrFnExec(colExpr, records) {
-    const fn = aggrFunctions[colExpr.name.toLowerCase()];
+    const fnName = getExprName(colExpr);
+    const fn = aggrFunctions[fnName];
     if (typeof fn === 'function') {
         return fn(colExpr, colExpr.args.distinct ? distinctValues(records) : records);
     }
-    throw new UnsupportedError(`${colExpr.name} function not yet supported`);
+    throw new UnsupportedError(`${fnName} function not yet supported`);
 }
 
 function fnArgumentToString(expr) {
@@ -159,7 +161,7 @@ function fnToString(expression) {
     const params = (Array.isArray(expression.args) ? expression.args : expression.args.value).map((item) => {
         return fnArgumentToString(item);
     });
-    const toStr = `${expression.name}(${params})`;
+    const toStr = `${getExprName(expression)}(${params})`;
     return toStr;
 }
 

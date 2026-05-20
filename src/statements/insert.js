@@ -18,7 +18,7 @@ export default async function insert(parsed) {
             }
         });
 
-        each(parsed.values, ({ value }) => {
+        each(parsed.values && parsed.values.values, ({ value }) => {
             const record = {};
             let tableColumnIndex = 0;
             const uniqueColumns = [];

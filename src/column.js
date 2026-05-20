@@ -1,4 +1,5 @@
 import each from 'seebigs-each';
+import { getExprName } from './utils';
 
 /* eslint-disable no-param-reassign */
 export function addColumn(table, def) {
@@ -29,7 +30,7 @@ export function addColumn(table, def) {
         if (defaultVal.type === 'function') {
             column.default = {
                 type: 'function',
-                name: defaultVal.name.toLowerCase(),
+                name: getExprName(defaultVal).toLowerCase(),
                 args: defaultVal.args.value,
             };
         } else {
