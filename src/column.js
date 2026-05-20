@@ -1,7 +1,6 @@
 import each from 'seebigs-each';
 import { getExprName } from './utils';
 
-/* eslint-disable no-param-reassign */
 export function addColumn(table, def) {
     const columnName = def.column.column;
     const column = {
@@ -69,4 +68,3 @@ export function dropKey(table, keyword) {
         });
     }
 }
-/* eslint-enable no-param-reassign */

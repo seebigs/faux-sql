@@ -1,4 +1,3 @@
-// eslint-disable-next-line import/no-extraneous-dependencies
 import { jest } from '@jest/globals';
 import { readFileSync, writeFileSync } from 'fs';
 import FauxSQL from '../../index.js';

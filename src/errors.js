@@ -1,5 +1,3 @@
-/* eslint-disable max-classes-per-file */
-
 /**
  * Used when a query violates a constraint
  */
